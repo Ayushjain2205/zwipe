@@ -2,7 +2,7 @@
 
 import type React from "react";
 
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -23,6 +23,7 @@ import {
   Bookmark,
   BookmarkCheck,
   ArrowLeft,
+  Check,
 } from "lucide-react";
 import {
   Dialog,
@@ -64,8 +65,20 @@ export default function MemecoinSwiper() {
     direction: "left" | "right";
   } | null>(null);
 
+  const [showSplash, setShowSplash] = useState(true);
+
   const currentCoin = mockMemecoins[currentIndex];
   const suggestedTokens = getSuggestedTokens(currentCoin?.id || "1");
+
+  useEffect(() => {
+    // Only show splash on mobile
+    if (window.innerWidth < 768) {
+      const timer = setTimeout(() => setShowSplash(false), 1500);
+      return () => clearTimeout(timer);
+    } else {
+      setShowSplash(false);
+    }
+  }, []);
 
   const handleSwipe = (direction: "left" | "right") => {
     if (isAnimating || isExpanded || showSuggestions) return;
@@ -241,6 +254,87 @@ export default function MemecoinSwiper() {
 
   const cardHeight = isExpanded || showSuggestions ? "660px" : "580px";
 
+  // Splash screen for mobile
+  if (showSplash) {
+    return (
+      <div className="block md:hidden h-screen w-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 flex items-center justify-center relative overflow-hidden">
+        {/* Animated Grid Background */}
+        <div className="absolute inset-0 opacity-20">
+          <div
+            className="absolute inset-0"
+            style={{
+              backgroundImage: `
+        linear-gradient(rgba(59, 130, 246, 0.1) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(59, 130, 246, 0.1) 1px, transparent 1px)
+      `,
+              backgroundSize: "50px 50px",
+              animation: "grid-move 20s linear infinite",
+            }}
+          ></div>
+        </div>
+        {/* Neon Glow Effects */}
+        <div className="absolute inset-0 overflow-hidden">
+          <div className="absolute top-20 left-20 w-96 h-96 bg-blue-500/20 rounded-full blur-3xl animate-pulse"></div>
+          <div
+            className="absolute bottom-20 right-20 w-80 h-80 bg-purple-500/20 rounded-full blur-3xl animate-pulse"
+            style={{ animationDelay: "1s" }}
+          ></div>
+          <div
+            className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-72 h-72 bg-cyan-500/15 rounded-full blur-3xl animate-pulse"
+            style={{ animationDelay: "2s" }}
+          ></div>
+        </div>
+        {/* Floating Elements */}
+        <div className="absolute inset-0 overflow-hidden pointer-events-none">
+          <div
+            className="absolute top-1/4 left-10 w-2 h-2 bg-blue-400 rounded-full animate-bounce"
+            style={{ animationDelay: "0s", animationDuration: "3s" }}
+          ></div>
+          <div
+            className="absolute top-1/3 right-16 w-1 h-1 bg-purple-400 rounded-full animate-bounce"
+            style={{ animationDelay: "1s", animationDuration: "4s" }}
+          ></div>
+          <div
+            className="absolute bottom-1/4 left-1/4 w-1.5 h-1.5 bg-cyan-400 rounded-full animate-bounce"
+            style={{ animationDelay: "2s", animationDuration: "5s" }}
+          ></div>
+          <div
+            className="absolute bottom-1/3 right-1/3 w-1 h-1 bg-indigo-400 rounded-full animate-bounce"
+            style={{ animationDelay: "3s", animationDuration: "3.5s" }}
+          ></div>
+        </div>
+        {/* ZWIPE Logo */}
+        <div className="w-full text-center z-10">
+          <h1
+            className="text-5xl text-white mb-2 drop-shadow-2xl"
+            style={{
+              fontFamily: "Slackey, cursive",
+              textShadow: "0 0 20px rgba(59, 130, 246, 0.5)",
+            }}
+          >
+            Z
+            <span
+              className="text-blue-400"
+              style={{ textShadow: "0 0 20px rgba(59, 130, 246, 0.8)" }}
+            >
+              WIPE
+            </span>
+          </h1>
+        </div>
+        <style jsx>{`
+          @keyframes grid-move {
+            0% {
+              transform: translate(0, 0);
+            }
+            100% {
+              transform: translate(50px, 50px);
+            }
+          }
+        `}</style>
+      </div>
+    );
+  }
+
   return (
     <div className="h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 flex items-center justify-center p-4 relative overflow-hidden">
       {/* Animated Grid Background */}
@@ -293,7 +387,7 @@ export default function MemecoinSwiper() {
 
       <div className="w-full max-w-sm mx-auto relative z-10">
         {/* Header */}
-        <div className="text-center mb-6">
+        <div className="text-center mb-6 hidden md:block">
           <h1
             className="text-4xl text-white mb-2 drop-shadow-2xl"
             style={{
@@ -309,15 +403,6 @@ export default function MemecoinSwiper() {
               WIPE
             </span>
           </h1>
-          <div className="flex items-center justify-center gap-2 text-blue-100 font-medium">
-            <Zap className="w-4 h-4 text-blue-400" />
-            <span style={{ fontFamily: "Slackey, cursive" }}>
-              {showSuggestions
-                ? "AI Suggestions for you"
-                : "Swipe right to buy, left to pass"}
-            </span>
-            <Flame className="w-4 h-4 text-purple-400" />
-          </div>
         </div>
 
         {/* Card Stack */}
@@ -446,16 +531,16 @@ export default function MemecoinSwiper() {
 
         {/* Action Buttons - only show when not expanded and not showing suggestions */}
         {!isExpanded && !showSuggestions && (
-          <div className="flex justify-center items-center gap-6">
+          <div className="flex justify-center items-center gap-3 md:gap-6">
             {/* CoinCierge Button */}
             <button
               onClick={toggleSuggestions}
-              className="w-20 h-20 rounded-full border-6 border-white bg-gradient-to-br from-purple-500 to-purple-700 hover:from-purple-600 hover:to-purple-800 backdrop-blur-sm transition-all duration-200 shadow-2xl transform hover:scale-110 flex items-center justify-center relative overflow-hidden"
+              className="w-14 h-14 md:w-20 md:h-20 rounded-full border-6 border-white bg-gradient-to-br from-purple-500 to-purple-700 hover:from-purple-600 hover:to-purple-800 backdrop-blur-sm transition-all duration-200 shadow-2xl transform hover:scale-110 flex items-center justify-center relative overflow-hidden"
               title="CoinCierge AI Suggestions"
             >
               <div className="absolute inset-0 bg-gradient-to-r from-purple-400/20 to-pink-400/20 animate-pulse"></div>
               <Bot
-                className="w-8 h-8 text-white mx-auto relative z-10 drop-shadow-lg"
+                className="w-7 h-7 md:w-8 md:h-8 text-white mx-auto relative z-10 drop-shadow-lg"
                 strokeWidth={3}
               />
             </button>
@@ -463,13 +548,13 @@ export default function MemecoinSwiper() {
             {/* Pass Button */}
             <Button
               size="lg"
-              className="w-20 h-20 rounded-full border-6 border-white bg-gradient-to-br from-red-500 to-red-700 hover:from-red-600 hover:to-red-800 text-white shadow-2xl transform hover:scale-110 transition-all duration-200 flex items-center justify-center p-0 relative overflow-hidden"
+              className="w-14 h-14 md:w-20 md:h-20 rounded-full border-6 border-white bg-gradient-to-br from-red-500 to-red-700 hover:from-red-600 hover:to-red-800 text-white shadow-2xl transform hover:scale-110 transition-all duration-200 flex items-center justify-center p-0 relative overflow-hidden"
               onClick={() => handleSwipe("left")}
               disabled={isAnimating}
             >
               <div className="absolute inset-0 bg-gradient-to-r from-red-400/20 to-orange-400/20 animate-pulse"></div>
               <X
-                className="w-8 h-8 relative z-10 drop-shadow-lg"
+                className="w-7 h-7 md:w-full md:h-full z-10 drop-shadow-lg scale-110 md:scale-125 mx-auto my-auto"
                 strokeWidth={4}
               />
             </Button>
@@ -477,13 +562,13 @@ export default function MemecoinSwiper() {
             {/* Buy Button */}
             <Button
               size="lg"
-              className="w-20 h-20 rounded-full border-6 border-white bg-gradient-to-br from-lime-400 to-green-500 hover:from-lime-300 hover:to-green-400 text-black shadow-2xl transform hover:scale-110 transition-all duration-200 flex items-center justify-center p-0 relative overflow-hidden"
+              className="w-14 h-14 md:w-20 md:h-20 rounded-full border-6 border-white bg-gradient-to-br from-lime-400 to-green-500 hover:from-lime-300 hover:to-green-400 text-black shadow-2xl transform hover:scale-110 transition-all duration-200 flex items-center justify-center p-0 relative overflow-hidden"
               onClick={() => handleSwipe("right")}
               disabled={isAnimating}
             >
               <div className="absolute inset-0 bg-gradient-to-r from-yellow-300/30 to-lime-300/30 animate-pulse"></div>
-              <DollarSign
-                className="w-8 h-8 relative z-10 drop-shadow-lg"
+              <Check
+                className="w-7 h-7 md:w-full md:h-full z-10 drop-shadow-lg scale-110 md:scale-125 mx-auto my-auto"
                 strokeWidth={4}
               />
             </Button>
@@ -491,7 +576,7 @@ export default function MemecoinSwiper() {
             {/* Bookmark Button */}
             <button
               onClick={toggleBookmark}
-              className={`w-20 h-20 rounded-full border-6 border-white backdrop-blur-sm transition-all duration-200 shadow-2xl transform hover:scale-110 flex items-center justify-center relative overflow-hidden ${
+              className={`w-14 h-14 md:w-20 md:h-20 rounded-full border-6 border-white backdrop-blur-sm transition-all duration-200 shadow-2xl transform hover:scale-110 flex items-center justify-center relative overflow-hidden ${
                 bookmarkedCoins.has(currentCoin.id)
                   ? "bg-gradient-to-br from-yellow-400 to-orange-500 hover:from-yellow-300 hover:to-orange-400"
                   : "bg-gradient-to-br from-gray-600 to-gray-800 hover:from-gray-500 hover:to-gray-700"
@@ -511,12 +596,12 @@ export default function MemecoinSwiper() {
               ></div>
               {bookmarkedCoins.has(currentCoin.id) ? (
                 <BookmarkCheck
-                  className="w-8 h-8 text-white relative z-10 drop-shadow-lg"
+                  className="w-7 h-7 md:w-8 md:h-8 text-white relative z-10 drop-shadow-lg"
                   strokeWidth={3}
                 />
               ) : (
                 <Bookmark
-                  className="w-8 h-8 text-white relative z-10 drop-shadow-lg"
+                  className="w-7 h-7 md:w-8 md:h-8 text-white relative z-10 drop-shadow-lg"
                   strokeWidth={3}
                 />
               )}

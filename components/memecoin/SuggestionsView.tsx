@@ -18,17 +18,17 @@ const SuggestionsView: React.FC<SuggestionsViewProps> = ({
   onBack,
 }) => {
   return (
-    <Card className="h-full w-full border-4 border-white shadow-2xl bg-white">
+    <Card className="h-full w-full border-4 border-white shadow-2xl bg-white overflow-hidden">
       <CardContent className="p-0 h-full">
         <div className="h-full flex flex-col">
           {/* Header */}
-          <div className="bg-gradient-to-r from-purple-500 to-pink-500 p-4 text-white">
+          <div className="bg-gradient-to-r from-purple-500 to-pink-500 p-4 text-white rounded-t-xl">
             <div className="flex items-center gap-3">
               <button
                 onClick={onBack}
                 className="bg-white/20 hover:bg-white/30 rounded-full p-2 transition-all duration-200"
               >
-                <ArrowLeft className="w-5 h-5" />
+                <ArrowLeft className="w-8 h-8 drop-shadow-lg" strokeWidth={4} />
               </button>
               <div>
                 <h2
