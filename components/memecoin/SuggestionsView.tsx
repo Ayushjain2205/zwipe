@@ -18,7 +18,7 @@ const SuggestionsView: React.FC<SuggestionsViewProps> = ({
   onBack,
 }) => {
   return (
-    <Card className="absolute inset-0 border-4 border-white shadow-2xl bg-white">
+    <Card className="h-full w-full border-4 border-white shadow-2xl bg-white">
       <CardContent className="p-0 h-full">
         <div className="h-full flex flex-col">
           {/* Header */}
