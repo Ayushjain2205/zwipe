@@ -12,6 +12,8 @@ import { mockMemecoins, Memecoin } from "@/components/memecoin/types";
 import MemecoinCard from "@/components/memecoin/MemecoinCard";
 import SuggestionsView from "@/components/memecoin/SuggestionsView";
 import BuyDialog from "@/components/memecoin/BuyDialog";
+import { ConnectButton } from "thirdweb/react";
+import { client } from "./client";
 
 const colorPalette = [
   "from-pink-400 to-purple-500",
@@ -340,6 +342,10 @@ export default function MemecoinSwiper() {
 
   return (
     <div className="h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 flex items-center justify-center p-4 relative overflow-hidden">
+      {/* Connect Button at top right */}
+      <div className="absolute top-4 right-4 z-50">
+        <ConnectButton client={client} />
+      </div>
       {/* Animated Grid Background */}
       <div className="absolute inset-0 opacity-20">
         <div
