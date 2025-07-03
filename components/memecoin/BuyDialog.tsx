@@ -10,12 +10,11 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Memecoin } from "./types";
-import Image from "next/image";
 
 interface BuyDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  coin: Memecoin;
+  coin: any;
   buyAmount: string;
   onBuyAmountChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
   onBuyConfirm: () => void;
@@ -39,10 +38,13 @@ const BuyDialog: React.FC<BuyDialogProps> = ({
             className="flex items-center gap-3 text-2xl"
             style={{ fontFamily: "Slackey, cursive" }}
           >
-            <Image
-              src={coin?.image || "/placeholder.svg"}
+            <img
+              src={
+                coin?.creatorProfile?.avatar?.previewImage?.medium ||
+                "/placeholder.svg"
+              }
               alt={coin?.name}
-              className="w-10 h-10 rounded-full border-2 border-gray-300"
+              className="w-10 h-10 rounded-full border-2 border-gray-300 object-cover"
               width={40}
               height={40}
             />
