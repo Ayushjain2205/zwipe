@@ -3,7 +3,6 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { ArrowLeft, BookmarkCheck } from "lucide-react";
 import { Memecoin } from "./types";
-import Image from "next/image";
 
 interface SuggestionsViewProps {
   suggestedTokens: Memecoin[];
@@ -81,7 +80,7 @@ const SuggestionsView: React.FC<SuggestionsViewProps> = ({
                   <span className="mt-2 animate-spin text-3xl">🪙</span>
                 </div>
               ) : (
-                coinsToShow.map((coin: any) => (
+                coinsToShow.map((coin: Memecoin) => (
                   <div
                     key={coin.id}
                     onClick={() => onSuggestionClick(coin.id)}

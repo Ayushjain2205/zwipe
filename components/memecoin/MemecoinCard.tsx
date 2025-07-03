@@ -6,13 +6,12 @@ import {
   TrendingDown,
   ChevronUp,
   ChevronDown,
-  Globe,
   User,
 } from "lucide-react";
-import { Memecoin } from "./types";
+import type { Memecoin } from "./types";
 
 interface MemecoinCardProps {
-  coin: any;
+  coin: Memecoin;
   isExpanded: boolean;
   getCardStyle: () => React.CSSProperties;
   onMouseDown: (e: React.MouseEvent) => void;

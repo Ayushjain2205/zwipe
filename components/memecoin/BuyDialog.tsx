@@ -9,12 +9,12 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Memecoin } from "./types";
+import type { Memecoin } from "./types";
 
 interface BuyDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  coin: any;
+  coin: Memecoin;
   buyAmount: string;
   onBuyAmountChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
   onBuyConfirm: () => void;

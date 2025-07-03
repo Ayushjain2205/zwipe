@@ -1,4 +1,4 @@
-import { Memecoin, mockMemecoins } from "./types";
+import { Memecoin } from "./types";
 
 export const getSuggestedTokens = (
   currentCoinId: string,
