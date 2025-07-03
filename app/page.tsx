@@ -2,40 +2,13 @@
 
 import type React from "react";
 
-import { useState, useRef, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import {
-  X,
-  TrendingUp,
-  TrendingDown,
-  DollarSign,
-  Zap,
-  Flame,
-  ChevronUp,
-  ChevronDown,
-  Calendar,
-  Users,
-  Globe,
-  BarChart3,
-  Bot,
-  Bookmark,
-  BookmarkCheck,
-  ArrowLeft,
-  Check,
-} from "lucide-react";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogFooter,
-} from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
+
+import { X, Bot, Bookmark, BookmarkCheck, Check } from "lucide-react";
 import { getSuggestedTokens } from "@/components/memecoin/utils";
-import { Memecoin, mockMemecoins } from "@/components/memecoin/types";
+import { mockMemecoins } from "@/components/memecoin/types";
 import MemecoinCard from "@/components/memecoin/MemecoinCard";
 import SuggestionsView from "@/components/memecoin/SuggestionsView";
 import BuyDialog from "@/components/memecoin/BuyDialog";
@@ -51,16 +24,12 @@ export default function MemecoinSwiper() {
   const [bookmarkedCoins, setBookmarkedCoins] = useState<Set<string>>(
     new Set()
   );
-  const cardRef = useRef<HTMLDivElement>(null);
 
   const [showBuyDialog, setShowBuyDialog] = useState(false);
   const [buyAmount, setBuyAmount] = useState("");
   const [showStamp, setShowStamp] = useState<
     "buy" | "pass" | "bookmark" | null
   >(null);
-  const [pendingAction, setPendingAction] = useState<"buy" | "pass" | null>(
-    null
-  );
   const [exitAnimation, setExitAnimation] = useState<{
     direction: "left" | "right";
   } | null>(null);
@@ -96,7 +65,6 @@ export default function MemecoinSwiper() {
       }, 800);
     } else {
       setTimeout(() => {
-        setPendingAction("buy");
         setShowBuyDialog(true);
         setIsAnimating(false);
         setShowStamp(null);
@@ -108,7 +76,6 @@ export default function MemecoinSwiper() {
     setCurrentIndex((prev) => (prev + 1) % mockMemecoins.length);
     setIsAnimating(false);
     setShowStamp(null);
-    setPendingAction(null);
     setExitAnimation(null);
     setDragOffset({ x: 0, y: 0 });
     setIsExpanded(false);
@@ -129,7 +96,6 @@ export default function MemecoinSwiper() {
     setBuyAmount("");
     setIsAnimating(false);
     setShowStamp(null);
-    setPendingAction(null);
     setDragOffset({ x: 0, y: 0 });
   };
 
@@ -257,7 +223,7 @@ export default function MemecoinSwiper() {
   // Splash screen for mobile
   if (showSplash) {
     return (
-      <div className="block md:hidden h-screen w-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 flex items-center justify-center relative overflow-hidden">
+      <div className=" md:hidden h-screen w-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 flex items-center justify-center relative overflow-hidden">
         {/* Animated Grid Background */}
         <div className="absolute inset-0 opacity-20">
           <div
@@ -450,12 +416,6 @@ export default function MemecoinSwiper() {
             <MemecoinCard
               coin={currentCoin}
               isExpanded={isExpanded}
-              isDragging={isDragging}
-              showSuggestions={showSuggestions}
-              dragOffset={dragOffset}
-              exitAnimation={exitAnimation}
-              showStamp={showStamp}
-              bookmarked={bookmarkedCoins.has(currentCoin.id)}
               getCardStyle={getCardStyle}
               onMouseDown={handleMouseDown}
               onMouseMove={handleMouseMove}
@@ -465,7 +425,6 @@ export default function MemecoinSwiper() {
               onTouchMove={handleTouchMove}
               onTouchEnd={handleTouchEnd}
               onToggleExpanded={toggleExpanded}
-              onToggleBookmark={toggleBookmark}
             />
           )}
 

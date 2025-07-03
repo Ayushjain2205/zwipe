@@ -10,6 +10,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Memecoin } from "./types";
+import Image from "next/image";
 
 interface BuyDialogProps {
   open: boolean;
@@ -38,10 +39,12 @@ const BuyDialog: React.FC<BuyDialogProps> = ({
             className="flex items-center gap-3 text-2xl"
             style={{ fontFamily: "Slackey, cursive" }}
           >
-            <img
+            <Image
               src={coin?.image || "/placeholder.svg"}
               alt={coin?.name}
               className="w-10 h-10 rounded-full border-2 border-gray-300"
+              width={40}
+              height={40}
             />
             BUY {coin?.name}
           </DialogTitle>
@@ -108,7 +111,7 @@ const BuyDialog: React.FC<BuyDialogProps> = ({
                 className="text-sm text-gray-600 bg-lime-50 p-3 rounded-lg border border-lime-200"
                 style={{ fontFamily: "Slackey, cursive" }}
               >
-                You'll get approximately{" "}
+                You&apos;ll get approximately{" "}
                 <span className="text-lime-700">
                   {(Number.parseFloat(buyAmount) / coin.price).toLocaleString()}
                 </span>{" "}

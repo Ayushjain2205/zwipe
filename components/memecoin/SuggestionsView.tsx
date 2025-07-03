@@ -3,6 +3,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { ArrowLeft, BookmarkCheck } from "lucide-react";
 import { Memecoin } from "./types";
+import Image from "next/image";
 
 interface SuggestionsViewProps {
   suggestedTokens: Memecoin[];
@@ -63,10 +64,11 @@ const SuggestionsView: React.FC<SuggestionsViewProps> = ({
                 >
                   {/* Coin Image Background */}
                   <div className="absolute inset-0 bg-black/20">
-                    <img
+                    <Image
                       src={coin.image || "/placeholder.svg"}
                       alt={coin.name}
                       className="w-full h-full object-cover opacity-30"
+                      layout="fill"
                     />
                   </div>
 

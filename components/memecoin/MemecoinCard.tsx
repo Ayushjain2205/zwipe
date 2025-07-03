@@ -6,21 +6,14 @@ import {
   TrendingDown,
   ChevronUp,
   ChevronDown,
-  BookmarkCheck,
-  Bookmark,
   Globe,
 } from "lucide-react";
 import { Memecoin } from "./types";
+import Image from "next/image";
 
 interface MemecoinCardProps {
   coin: Memecoin;
   isExpanded: boolean;
-  isDragging: boolean;
-  showSuggestions: boolean;
-  dragOffset: { x: number; y: number };
-  exitAnimation: { direction: "left" | "right" } | null;
-  showStamp: "buy" | "pass" | "bookmark" | null;
-  bookmarked: boolean;
   getCardStyle: () => React.CSSProperties;
   onMouseDown: (e: React.MouseEvent) => void;
   onMouseMove: (e: React.MouseEvent) => void;
@@ -30,18 +23,11 @@ interface MemecoinCardProps {
   onTouchMove: (e: React.TouchEvent) => void;
   onTouchEnd: (e: React.TouchEvent) => void;
   onToggleExpanded: () => void;
-  onToggleBookmark: () => void;
 }
 
 const MemecoinCard: React.FC<MemecoinCardProps> = ({
   coin,
   isExpanded,
-  isDragging,
-  showSuggestions,
-  dragOffset,
-  exitAnimation,
-  showStamp,
-  bookmarked,
   getCardStyle,
   onMouseDown,
   onMouseMove,
@@ -51,7 +37,6 @@ const MemecoinCard: React.FC<MemecoinCardProps> = ({
   onTouchMove,
   onTouchEnd,
   onToggleExpanded,
-  onToggleBookmark,
 }) => {
   return (
     <Card
@@ -80,9 +65,11 @@ const MemecoinCard: React.FC<MemecoinCardProps> = ({
             } flex items-center justify-center p-8 relative`}
           >
             <div className="absolute inset-0 bg-black/10 rounded-t-lg"></div>
-            <img
+            <Image
               src={coin.image || "/placeholder.svg"}
               alt={coin.name}
+              width={isExpanded ? 96 : 160}
+              height={isExpanded ? 96 : 160}
               className={`${
                 isExpanded ? "w-24 h-24" : "w-40 h-40"
               } rounded-full border-6 border-white shadow-2xl relative z-10 transition-all duration-300`}
