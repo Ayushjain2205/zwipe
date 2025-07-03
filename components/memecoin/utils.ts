@@ -1,6 +1,9 @@
 import { Memecoin, mockMemecoins } from "./types";
 
-export const getSuggestedTokens = (currentCoinId: string): Memecoin[] => {
+export const getSuggestedTokens = (
+  currentCoinId: string,
+  memecoins: Memecoin[]
+): Memecoin[] => {
   const suggestions: { [key: string]: string[] } = {
     "1": ["2", "4"], // DOGE -> SHIB, FLOKI
     "2": ["1", "3"], // SHIB -> DOGE, PEPE
@@ -10,5 +13,5 @@ export const getSuggestedTokens = (currentCoinId: string): Memecoin[] => {
   };
 
   const suggestedIds = suggestions[currentCoinId] || ["1", "2"];
-  return mockMemecoins.filter((coin) => suggestedIds.includes(coin.id));
+  return memecoins.filter((coin) => suggestedIds.includes(coin.id));
 };

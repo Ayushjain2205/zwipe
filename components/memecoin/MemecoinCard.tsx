@@ -7,12 +7,12 @@ import {
   ChevronUp,
   ChevronDown,
   Globe,
+  User,
 } from "lucide-react";
 import { Memecoin } from "./types";
-import Image from "next/image";
 
 interface MemecoinCardProps {
-  coin: Memecoin;
+  coin: any;
   isExpanded: boolean;
   getCardStyle: () => React.CSSProperties;
   onMouseDown: (e: React.MouseEvent) => void;
@@ -23,6 +23,31 @@ interface MemecoinCardProps {
   onTouchMove: (e: React.TouchEvent) => void;
   onTouchEnd: (e: React.TouchEvent) => void;
   onToggleExpanded: () => void;
+}
+
+// Helper to map tailwind gradient string to actual color values
+const colorMap: Record<string, string> = {
+  "from-pink-400": "#f472b6",
+  "to-purple-500": "#a78bfa",
+  "from-yellow-400": "#facc15",
+  "to-orange-500": "#f97316",
+  "from-green-400": "#4ade80",
+  "to-lime-500": "#84cc16",
+  "from-blue-400": "#60a5fa",
+  "to-cyan-500": "#06b6d4",
+  "from-indigo-400": "#818cf8",
+  "to-blue-500": "#3b82f6",
+  "from-red-400": "#f87171",
+  "to-pink-500": "#ec4899",
+  "from-purple-400": "#a78bfa",
+  "to-indigo-500": "#6366f1",
+};
+
+function getGradientFromColorString(colorString: string) {
+  const [from, to] = colorString.split(" ");
+  const fromColor = colorMap[from] || "#f472b6";
+  const toColor = colorMap[to] || "#a78bfa";
+  return `linear-gradient(135deg, ${fromColor} 0%, ${toColor} 100%)`;
 }
 
 const MemecoinCard: React.FC<MemecoinCardProps> = ({
@@ -64,33 +89,44 @@ const MemecoinCard: React.FC<MemecoinCardProps> = ({
               isExpanded ? "flex-none" : "flex-1"
             } flex items-center justify-center p-8 relative`}
           >
-            <div className="absolute inset-0 bg-black/10 rounded-t-lg"></div>
-            <Image
-              src={coin.image || "/placeholder.svg"}
+            <div
+              className="absolute inset-0 rounded-t-lg"
+              style={{
+                background: getGradientFromColorString(coin.color),
+              }}
+            ></div>
+            <img
+              src={
+                coin.creatorProfile?.avatar?.previewImage?.medium ||
+                "/placeholder.svg"
+              }
               alt={coin.name}
               width={isExpanded ? 96 : 160}
               height={isExpanded ? 96 : 160}
               className={`${
                 isExpanded ? "w-24 h-24" : "w-40 h-40"
               } rounded-full border-6 border-white shadow-2xl relative z-10 transition-all duration-300`}
+              style={{ objectFit: "cover" }}
             />
             <div className="absolute top-4 right-4 z-10">
               <Badge
-                variant={coin.change24h > 0 ? "default" : "destructive"}
+                variant={
+                  Number(coin.marketCapDelta24h) > 0 ? "default" : "destructive"
+                }
                 className={`text-lg px-3 py-1 ${
-                  coin.change24h > 0
+                  Number(coin.marketCapDelta24h) > 0
                     ? "bg-lime-400 text-black hover:bg-lime-300"
                     : "bg-red-500 text-white hover:bg-red-600"
                 }`}
                 style={{ fontFamily: "Slackey, cursive" }}
               >
-                {coin.change24h > 0 ? (
+                {Number(coin.marketCapDelta24h) > 0 ? (
                   <TrendingUp className="w-4 h-4 mr-1" />
                 ) : (
                   <TrendingDown className="w-4 h-4 mr-1" />
                 )}
-                {coin.change24h > 0 ? "+" : ""}
-                {coin.change24h}%
+                {Number(coin.marketCapDelta24h) > 0 ? "+" : ""}
+                {Math.floor(Number(coin.marketCapDelta24h))}%
               </Badge>
             </div>
             {/* Expand/Collapse Button */}
@@ -106,6 +142,26 @@ const MemecoinCard: React.FC<MemecoinCardProps> = ({
             </button>
           </div>
 
+          {/* Coin Name and Ticker (restore above stat rows) */}
+          <div className="text-center px-2">
+            <h2
+              className={`${
+                isExpanded ? "text-2xl" : "text-3xl"
+              } mb-1 transition-all duration-300 text-gray-900 break-words max-w-full`}
+              style={{ fontFamily: "Slackey, cursive" }}
+            >
+              {coin.name}
+            </h2>
+            <p
+              className={`${
+                isExpanded ? "text-lg" : "text-xl"
+              } text-gray-600 transition-all duration-300 truncate`}
+              style={{ fontFamily: "Slackey, cursive" }}
+            >
+              ${coin.symbol}
+            </p>
+          </div>
+
           {/* Coin Info */}
           <div
             className={`bg-white/95 backdrop-blur-sm text-gray-900 rounded-b-lg ${
@@ -115,42 +171,10 @@ const MemecoinCard: React.FC<MemecoinCardProps> = ({
             <div
               className={`${
                 isExpanded ? "h-full overflow-y-auto" : ""
-              } p-6 space-y-4`}
+              } p-6 py-2 space-y-4`}
             >
-              <div className="text-center">
-                <h2
-                  className={`${
-                    isExpanded ? "text-2xl" : "text-3xl"
-                  } mb-1 transition-all duration-300`}
-                  style={{ fontFamily: "Slackey, cursive" }}
-                >
-                  {coin.name}
-                </h2>
-                <p
-                  className={`${
-                    isExpanded ? "text-lg" : "text-xl"
-                  } text-gray-600 transition-all duration-300`}
-                  style={{ fontFamily: "Slackey, cursive" }}
-                >
-                  {coin.symbol}
-                </p>
-              </div>
-
-              <div className="grid grid-cols-2 gap-4">
-                <div className="bg-gray-100 rounded-xl p-4 text-center">
-                  <p
-                    className="text-sm text-gray-500 uppercase tracking-wide"
-                    style={{ fontFamily: "Slackey, cursive" }}
-                  >
-                    Price
-                  </p>
-                  <p
-                    className="text-2xl text-gray-900"
-                    style={{ fontFamily: "Slackey, cursive" }}
-                  >
-                    ${coin.price}
-                  </p>
-                </div>
+              {/* Market Cap and Holders Row (first row) */}
+              <div className="grid grid-cols-2 gap-4 mb-2">
                 <div className="bg-gray-100 rounded-xl p-4 text-center">
                   <p
                     className="text-sm text-gray-500 uppercase tracking-wide"
@@ -165,104 +189,96 @@ const MemecoinCard: React.FC<MemecoinCardProps> = ({
                     {coin.marketCap}
                   </p>
                 </div>
+                <div className="bg-purple-50 rounded-xl p-4 text-center">
+                  <p
+                    className="text-sm text-purple-400 uppercase tracking-wide"
+                    style={{ fontFamily: "Slackey, cursive" }}
+                  >
+                    Holders
+                  </p>
+                  <p
+                    className="text-2xl text-purple-600"
+                    style={{ fontFamily: "Slackey, cursive" }}
+                  >
+                    {coin.uniqueHolders}
+                  </p>
+                </div>
               </div>
 
-              <p
-                className="text-gray-700 text-center leading-relaxed"
-                style={{ fontFamily: "Slackey, cursive" }}
+              {/* 24h Volume and Token Address Row (second row) */}
+              <div className="grid grid-cols-2 gap-4 mb-3">
+                <div className="bg-blue-50 rounded-xl p-4 text-center">
+                  <p
+                    className="text-sm text-blue-600 uppercase tracking-wide"
+                    style={{ fontFamily: "Slackey, cursive" }}
+                  >
+                    24h Volume
+                  </p>
+                  <p
+                    className="text-2xl text-blue-900"
+                    style={{ fontFamily: "Slackey, cursive" }}
+                  >
+                    {coin.volume24h}
+                  </p>
+                </div>
+                <div className="bg-yellow-50 rounded-xl p-4 text-center">
+                  <p
+                    className="text-sm text-yellow-600 uppercase tracking-wide"
+                    style={{ fontFamily: "Slackey, cursive" }}
+                  >
+                    Address
+                  </p>
+                  <a
+                    href={`https://basescan.org/address/${coin.address}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-base text-yellow-800 font-mono hover:underline"
+                    style={{ fontFamily: "Slackey, cursive" }}
+                  >
+                    {coin.address
+                      ? `${coin.address.slice(0, 6)}...${coin.address.slice(
+                          -4
+                        )}`
+                      : "-"}
+                  </a>
+                </div>
+              </div>
+
+              {/* Creator Section - smaller, icon instead of avatar */}
+              <div
+                className="flex items-center gap-2 mb-1 cursor-pointer hover:bg-gray-50 rounded p-1 transition"
+                style={{ maxWidth: 180 }}
+                onClick={() => {
+                  if (coin.creatorAddress) {
+                    window.open(
+                      `https://basescan.org/address/${coin.creatorAddress}`,
+                      "_blank"
+                    );
+                  }
+                }}
               >
-                {coin.description}
-              </p>
+                <User className="w-5 h-5 text-gray-400" />
+                <div>
+                  <div
+                    className="text-xs text-gray-400"
+                    style={{ fontFamily: "Slackey, cursive" }}
+                  >
+                    Created by
+                  </div>
+                  <div
+                    className="text-sm text-gray-700 font-semibold"
+                    style={{ fontFamily: "Slackey, cursive" }}
+                  >
+                    {coin.creatorProfile?.handle || "Unknown"}
+                  </div>
+                </div>
+              </div>
 
               {/* Expanded Details */}
               {isExpanded && (
                 <div className="space-y-6 mt-6">
-                  {/* Additional Stats */}
-                  <div className="grid grid-cols-2 gap-4">
-                    <div className="bg-blue-50 rounded-xl p-4 text-center">
-                      <svg className="w-5 h-5 text-blue-600 mx-auto mb-2">
-                        <use href="#bar-chart-3" />
-                      </svg>
-                      <p
-                        className="text-xs text-blue-600 uppercase tracking-wide"
-                        style={{ fontFamily: "Slackey, cursive" }}
-                      >
-                        24h Volume
-                      </p>
-                      <p
-                        className="text-lg text-blue-900"
-                        style={{ fontFamily: "Slackey, cursive" }}
-                      >
-                        {coin.volume24h}
-                      </p>
-                    </div>
-                    <div className="bg-purple-50 rounded-xl p-4 text-center">
-                      <svg className="w-5 h-5 text-purple-600 mx-auto mb-2">
-                        <use href="#users" />
-                      </svg>
-                      <p
-                        className="text-xs text-purple-600 uppercase tracking-wide"
-                        style={{ fontFamily: "Slackey, cursive" }}
-                      >
-                        Holders
-                      </p>
-                      <p
-                        className="text-lg text-purple-900"
-                        style={{ fontFamily: "Slackey, cursive" }}
-                      >
-                        {coin.holders}
-                      </p>
-                    </div>
-                  </div>
-
-                  {/* Price History */}
-                  <div className="bg-gradient-to-r from-green-50 to-red-50 rounded-xl p-4">
-                    <h3
-                      className="text-lg mb-3 text-center"
-                      style={{ fontFamily: "Slackey, cursive" }}
-                    >
-                      Price History
-                    </h3>
-                    <div className="grid grid-cols-2 gap-4">
-                      <div className="text-center">
-                        <p
-                          className="text-xs text-green-600 uppercase tracking-wide"
-                          style={{ fontFamily: "Slackey, cursive" }}
-                        >
-                          All Time High
-                        </p>
-                        <p
-                          className="text-lg text-green-900"
-                          style={{ fontFamily: "Slackey, cursive" }}
-                        >
-                          ${coin.allTimeHigh}
-                        </p>
-                      </div>
-                      <div className="text-center">
-                        <p
-                          className="text-xs text-red-600 uppercase tracking-wide"
-                          style={{ fontFamily: "Slackey, cursive" }}
-                        >
-                          All Time Low
-                        </p>
-                        <p
-                          className="text-lg text-red-900"
-                          style={{ fontFamily: "Slackey, cursive" }}
-                        >
-                          ${coin.allTimeLow}
-                        </p>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Supply Info */}
+                  {/* Combined Supply and Project Details Section */}
                   <div className="bg-gray-50 rounded-xl p-4">
-                    <h3
-                      className="text-lg mb-3 text-center"
-                      style={{ fontFamily: "Slackey, cursive" }}
-                    >
-                      Supply Information
-                    </h3>
                     <div className="space-y-2">
                       <div className="flex justify-between">
                         <span
@@ -283,62 +299,23 @@ const MemecoinCard: React.FC<MemecoinCardProps> = ({
                           className="text-sm text-gray-600"
                           style={{ fontFamily: "Slackey, cursive" }}
                         >
-                          Circulating:
+                          Date Created:
                         </span>
                         <span
                           className="text-sm"
                           style={{ fontFamily: "Slackey, cursive" }}
                         >
-                          {coin.circulatingSupply}
+                          {coin.createdAt
+                            ? new Date(coin.createdAt).toLocaleDateString(
+                                undefined,
+                                {
+                                  year: "numeric",
+                                  month: "short",
+                                  day: "numeric",
+                                }
+                              )
+                            : "-"}
                         </span>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Project Info */}
-                  <div className="bg-yellow-50 rounded-xl p-4">
-                    <div className="flex items-center gap-2 mb-3">
-                      <svg className="w-5 h-5 text-yellow-600">
-                        <use href="#calendar" />
-                      </svg>
-                      <h3
-                        className="text-lg"
-                        style={{ fontFamily: "Slackey, cursive" }}
-                      >
-                        Project Details
-                      </h3>
-                    </div>
-                    <div className="space-y-2">
-                      <div className="flex justify-between">
-                        <span
-                          className="text-sm text-gray-600"
-                          style={{ fontFamily: "Slackey, cursive" }}
-                        >
-                          Launch Date:
-                        </span>
-                        <span
-                          className="text-sm"
-                          style={{ fontFamily: "Slackey, cursive" }}
-                        >
-                          {coin.launchDate}
-                        </span>
-                      </div>
-                      <div className="flex justify-between items-center">
-                        <span
-                          className="text-sm text-gray-600"
-                          style={{ fontFamily: "Slackey, cursive" }}
-                        >
-                          Website:
-                        </span>
-                        <div className="flex items-center gap-1">
-                          <Globe className="w-4 h-4 text-blue-600" />
-                          <span
-                            className="text-sm text-blue-600"
-                            style={{ fontFamily: "Slackey, cursive" }}
-                          >
-                            {coin.website}
-                          </span>
-                        </div>
                       </div>
                     </div>
                   </div>
@@ -355,7 +332,7 @@ const MemecoinCard: React.FC<MemecoinCardProps> = ({
                       className="text-sm text-gray-700 leading-relaxed"
                       style={{ fontFamily: "Slackey, cursive" }}
                     >
-                      {coin.about}
+                      {coin.description}
                     </p>
                   </div>
                 </div>

@@ -8,12 +8,31 @@ import { Button } from "@/components/ui/button";
 
 import { X, Bot, Bookmark, BookmarkCheck, Check } from "lucide-react";
 import { getSuggestedTokens } from "@/components/memecoin/utils";
-import { mockMemecoins } from "@/components/memecoin/types";
+import { mockMemecoins, Memecoin } from "@/components/memecoin/types";
 import MemecoinCard from "@/components/memecoin/MemecoinCard";
 import SuggestionsView from "@/components/memecoin/SuggestionsView";
 import BuyDialog from "@/components/memecoin/BuyDialog";
 
+const colorPalette = [
+  "from-pink-400 to-purple-500",
+  "from-yellow-400 to-orange-500",
+  "from-green-400 to-lime-500",
+  "from-blue-400 to-cyan-500",
+  "from-indigo-400 to-blue-500",
+  "from-red-400 to-pink-500",
+  "from-purple-400 to-indigo-500",
+];
+
+function assignColorToCoin(coin: Memecoin, index: number): Memecoin {
+  const key = coin.id || String(index);
+  let hash = 0;
+  for (let i = 0; i < key.length; i++) hash += key.charCodeAt(i);
+  const color = colorPalette[hash % colorPalette.length];
+  return { ...coin, color };
+}
+
 export default function MemecoinSwiper() {
+  const [memecoins, setMemecoins] = useState<Memecoin[]>([]);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isAnimating, setIsAnimating] = useState(false);
   const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
@@ -36,8 +55,26 @@ export default function MemecoinSwiper() {
 
   const [showSplash, setShowSplash] = useState(true);
 
-  const currentCoin = mockMemecoins[currentIndex];
-  const suggestedTokens = getSuggestedTokens(currentCoin?.id || "1");
+  useEffect(() => {
+    // Fetch real memecoins data from API
+    const fetchMemecoins = async () => {
+      try {
+        const res = await fetch("/api/getcoinstop");
+        if (!res.ok) throw new Error("Failed to fetch memecoins");
+        const data = await res.json();
+        setMemecoins(
+          Array.isArray(data.coins) ? data.coins.map(assignColorToCoin) : []
+        );
+      } catch (err) {
+        console.error(err);
+        setMemecoins(mockMemecoins); // fallback to mock if error
+      }
+    };
+    fetchMemecoins();
+  }, []);
+
+  const currentCoin = memecoins[currentIndex];
+  const suggestedTokens = getSuggestedTokens(currentCoin?.id || "1", memecoins);
 
   useEffect(() => {
     // Only show splash on mobile
@@ -73,7 +110,7 @@ export default function MemecoinSwiper() {
   };
 
   const completeSwipe = () => {
-    setCurrentIndex((prev) => (prev + 1) % mockMemecoins.length);
+    setCurrentIndex((prev) => (prev + 1) % memecoins.length);
     setIsAnimating(false);
     setShowStamp(null);
     setExitAnimation(null);
@@ -163,7 +200,7 @@ export default function MemecoinSwiper() {
   };
 
   const handleSuggestionClick = (coinId: string) => {
-    const coinIndex = mockMemecoins.findIndex((coin) => coin.id === coinId);
+    const coinIndex = memecoins.findIndex((coin) => coin.id === coinId);
     if (coinIndex !== -1) {
       setCurrentIndex(coinIndex);
       setShowSuggestions(false);
@@ -376,7 +413,7 @@ export default function MemecoinSwiper() {
           {/* Background cards for stack effect - only show when not expanded or showing suggestions */}
           {!isExpanded &&
             !showSuggestions &&
-            mockMemecoins
+            memecoins
               .slice(currentIndex + 1, currentIndex + 3)
               .map((coin, index) => (
                 <Card
