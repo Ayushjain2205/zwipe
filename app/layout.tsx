@@ -2,7 +2,8 @@ import type React from "react";
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
-import { ThirdwebProvider } from "thirdweb/react";
+import Providers from "./providers";
+import "@rainbow-me/rainbowkit/styles.css";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -27,7 +28,7 @@ export default function RootLayout({
         />
       </head>
       <body className={inter.className}>
-        <ThirdwebProvider>{children}</ThirdwebProvider>
+        <Providers>{children}</Providers>
       </body>
     </html>
   );
