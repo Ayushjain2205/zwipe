@@ -56,18 +56,19 @@ const BuyDialog: React.FC<BuyDialogProps> = ({
           <div className="bg-gradient-to-r from-gray-50 to-gray-100 p-4 rounded-xl border-2 border-gray-200">
             <div className="flex justify-between items-center mb-3">
               <span
-                className="text-sm text-gray-600 uppercase tracking-wide"
+                className="text-sm text-blue-600 uppercase tracking-wide"
                 style={{ fontFamily: "Slackey, cursive" }}
               >
-                Current Price:
+                24h Volume:
               </span>
               <span
-                className="text-xl"
+                className="text-xl text-blue-900"
                 style={{ fontFamily: "Slackey, cursive" }}
               >
-                ${coin?.price}
+                {coin?.volume24h}
               </span>
             </div>
+            {/* 24h Change Row (from marketCapDelta24h) */}
             <div className="flex justify-between items-center">
               <span
                 className="text-sm text-gray-600 uppercase tracking-wide"
@@ -77,14 +78,14 @@ const BuyDialog: React.FC<BuyDialogProps> = ({
               </span>
               <span
                 className={`text-xl ${
-                  coin?.change24h && coin.change24h > 0
+                  Number(coin.marketCapDelta24h) > 0
                     ? "text-lime-600"
                     : "text-red-600"
                 }`}
                 style={{ fontFamily: "Slackey, cursive" }}
               >
-                {coin?.change24h && coin.change24h > 0 ? "+" : ""}
-                {coin?.change24h}%
+                {Number(coin.marketCapDelta24h) > 0 ? "+" : ""}
+                {Math.floor(Number(coin.marketCapDelta24h))}%
               </span>
             </div>
           </div>
@@ -95,31 +96,41 @@ const BuyDialog: React.FC<BuyDialogProps> = ({
               className="text-lg text-gray-700"
               style={{ fontFamily: "Slackey, cursive" }}
             >
-              Amount to invest (USD)
+              Amount to invest (ETH)
             </Label>
             <Input
               id="amount"
               type="number"
-              placeholder="Enter amount..."
+              placeholder="Enter amount in ETH..."
               value={buyAmount}
               onChange={onBuyAmountChange}
               min="0"
-              step="0.01"
+              step="0.0001"
               className="text-lg border-2 border-gray-300 rounded-xl p-4 focus:border-lime-400"
               style={{ fontFamily: "Slackey, cursive" }}
             />
-            {buyAmount && Number.parseFloat(buyAmount) > 0 && coin && (
-              <p
-                className="text-sm text-gray-600 bg-lime-50 p-3 rounded-lg border border-lime-200"
-                style={{ fontFamily: "Slackey, cursive" }}
-              >
-                You&apos;ll get approximately{" "}
-                <span className="text-lime-700">
-                  {(Number.parseFloat(buyAmount) / coin.price).toLocaleString()}
-                </span>{" "}
-                <span>{coin.symbol}</span>
-              </p>
-            )}
+            {/* ETH Quick-select Pills */}
+            <div className="flex gap-2 mt-2">
+              {["0.001", "0.005", "0.02"].map((amt) => (
+                <button
+                  key={amt}
+                  type="button"
+                  onClick={() =>
+                    onBuyAmountChange({
+                      target: { value: amt },
+                    } as React.ChangeEvent<HTMLInputElement>)
+                  }
+                  className={`px-4 py-1 rounded-full border-2 transition text-base font-semibold focus:outline-none focus:ring-2 focus:ring-lime-400 ${
+                    buyAmount === amt
+                      ? "bg-lime-400 border-lime-500 text-black"
+                      : "bg-white border-gray-300 text-gray-700 hover:bg-gray-100"
+                  }`}
+                  style={{ fontFamily: "Slackey, cursive" }}
+                >
+                  {amt} ETH
+                </button>
+              ))}
+            </div>
           </div>
         </div>
 
@@ -138,7 +149,7 @@ const BuyDialog: React.FC<BuyDialogProps> = ({
             className="bg-lime-400 hover:bg-lime-300 text-black border-2 border-lime-500"
             style={{ fontFamily: "Slackey, cursive" }}
           >
-            BUY ${buyAmount || "0"}
+            BUY {buyAmount || "0"} ETH
           </Button>
         </DialogFooter>
       </DialogContent>

@@ -145,7 +145,9 @@ const MemecoinCard: React.FC<MemecoinCardProps> = ({
           <div className="text-center px-2">
             <h2
               className={`${
-                isExpanded ? "text-2xl" : "text-3xl"
+                isExpanded
+                  ? "text-2xl"
+                  : "text-3xl truncate whitespace-nowrap overflow-hidden text-ellipsis"
               } mb-1 transition-all duration-300 text-gray-900 break-words max-w-full`}
               style={{ fontFamily: "Slackey, cursive" }}
             >
