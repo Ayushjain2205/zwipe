@@ -1,11 +1,9 @@
 "use client";
 
 import type React from "react";
-
 import { useState, useEffect } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-
 import { X, Bot, Bookmark, BookmarkCheck, Check, Plus } from "lucide-react";
 import { getSuggestedTokens } from "@/components/memecoin/utils";
 import { mockMemecoins, Memecoin } from "@/components/memecoin/types";
@@ -13,8 +11,8 @@ import MemecoinCard from "@/components/memecoin/MemecoinCard";
 import SuggestionsView from "@/components/memecoin/SuggestionsView";
 import BuyDialog from "@/components/memecoin/BuyDialog";
 import { ConnectButton } from "@rainbow-me/rainbowkit";
-import { useAccount, useWalletClient } from "wagmi";
 import CreateCoinDialog from "@/components/memecoin/CreateCoinDialog";
+import Loader from "@/components/ui/Loader";
 
 const colorPalette = [
   "from-pink-400 to-purple-500",
@@ -35,6 +33,9 @@ function assignColorToCoin(coin: Memecoin, index: number): Memecoin {
 }
 
 export default function MemecoinSwiper() {
+  // All hooks at the top, always called
+  const [mounted, setMounted] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [memecoins, setMemecoins] = useState<Memecoin[]>([]);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isAnimating, setIsAnimating] = useState(false);
@@ -46,7 +47,6 @@ export default function MemecoinSwiper() {
   const [bookmarkedCoins, setBookmarkedCoins] = useState<Set<string>>(
     new Set()
   );
-
   const [showBuyDialog, setShowBuyDialog] = useState(false);
   const [buyAmount, setBuyAmount] = useState("");
   const [showStamp, setShowStamp] = useState<
@@ -55,13 +55,17 @@ export default function MemecoinSwiper() {
   const [exitAnimation, setExitAnimation] = useState<{
     direction: "left" | "right";
   } | null>(null);
-
   const [showSplash, setShowSplash] = useState(true);
   const [showCreateDialog, setShowCreateDialog] = useState(false);
 
   useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  useEffect(() => {
     // Fetch real memecoins data from API
     const fetchMemecoins = async () => {
+      setLoading(true);
       try {
         const res = await fetch("/api/getcoinstop");
         if (!res.ok) throw new Error("Failed to fetch memecoins");
@@ -72,13 +76,12 @@ export default function MemecoinSwiper() {
       } catch (err) {
         console.error(err);
         setMemecoins(mockMemecoins); // fallback to mock if error
+      } finally {
+        setLoading(false);
       }
     };
     fetchMemecoins();
   }, []);
-
-  const currentCoin = memecoins[currentIndex];
-  const suggestedTokens = getSuggestedTokens(currentCoin?.id || "1", memecoins);
 
   useEffect(() => {
     // Only show splash on mobile
@@ -89,6 +92,14 @@ export default function MemecoinSwiper() {
       setShowSplash(false);
     }
   }, []);
+
+  // Show loader until both hydration and data loading are complete
+  if (!mounted || loading) {
+    return <Loader />;
+  }
+
+  const currentCoin = memecoins[currentIndex];
+  const suggestedTokens = getSuggestedTokens(currentCoin?.id || "1", memecoins);
 
   const handleSwipe = (direction: "left" | "right") => {
     if (isAnimating || isExpanded || showSuggestions) return;
