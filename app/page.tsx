@@ -6,7 +6,7 @@ import { useState, useEffect } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 
-import { X, Bot, Bookmark, BookmarkCheck, Check } from "lucide-react";
+import { X, Bot, Bookmark, BookmarkCheck, Check, Plus } from "lucide-react";
 import { getSuggestedTokens } from "@/components/memecoin/utils";
 import { mockMemecoins, Memecoin } from "@/components/memecoin/types";
 import MemecoinCard from "@/components/memecoin/MemecoinCard";
@@ -14,6 +14,7 @@ import SuggestionsView from "@/components/memecoin/SuggestionsView";
 import BuyDialog from "@/components/memecoin/BuyDialog";
 import { ConnectButton } from "@rainbow-me/rainbowkit";
 import { useAccount, useWalletClient } from "wagmi";
+import CreateCoinDialog from "@/components/memecoin/CreateCoinDialog";
 
 const colorPalette = [
   "from-pink-400 to-purple-500",
@@ -56,6 +57,7 @@ export default function MemecoinSwiper() {
   } | null>(null);
 
   const [showSplash, setShowSplash] = useState(true);
+  const [showCreateDialog, setShowCreateDialog] = useState(false);
 
   useEffect(() => {
     // Fetch real memecoins data from API
@@ -396,7 +398,7 @@ export default function MemecoinSwiper() {
 
       <div className="w-full max-w-sm mx-auto relative z-10">
         {/* Header */}
-        <div className="text-center mb-6 hidden md:block">
+        <div className="text-center mb-6 hidden md:block relative flex items-center justify-center">
           <h1
             className="text-4xl text-white mb-2 drop-shadow-2xl"
             style={{
@@ -412,6 +414,21 @@ export default function MemecoinSwiper() {
               WIPE
             </span>
           </h1>
+          {/* Create Button */}
+          <button
+            onClick={() => setShowCreateDialog(true)}
+            className="absolute right-0 top-1/2 -translate-y-1/2 rounded-full p-2 border-2 border-white transition-all duration-300 hover:scale-125 focus:outline-none group bg-gradient-to-br from-lime-400 to-green-500"
+            title="Create Coin"
+            style={{ marginLeft: 16 }}
+          >
+            <span className="relative block">
+              {/* Plus Icon with funky animation */}
+              <Plus
+                className="w-7 h-7 z-10 relative text-white transition-transform duration-300 group-hover:rotate-180 group-hover:scale-125"
+                strokeWidth={3}
+              />
+            </span>
+          </button>
         </div>
 
         {/* Card Stack */}
@@ -620,6 +637,12 @@ export default function MemecoinSwiper() {
           onBuyAmountChange={(e) => setBuyAmount(e.target.value)}
           onBuyConfirm={handleBuyConfirm}
           onBuyCancel={handleBuyCancel}
+        />
+
+        {/* Create Coin Dialog */}
+        <CreateCoinDialog
+          open={showCreateDialog}
+          onOpenChange={setShowCreateDialog}
         />
       </div>
       <style jsx>{`
