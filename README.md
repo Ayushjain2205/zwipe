@@ -82,7 +82,11 @@ ZWipe is designed to be the discovery + creation layer on top of Zora — making
 
 ## 🖼️ Gallery
 
-Add your app screenshots below:
+A glimpse of the Zappmint platform in action:
 
-![Screenshot 1](#link-to-screenshot-1)
-![Screenshot 2](#link-to-screenshot-2)
+<p align="center">
+  <img src="https://i.postimg.cc/RVJ6dkpD/Screenshot-2025-07-10-at-10-45-56-PM.png" alt="Create Page" width="300"/>
+  <img src="https://i.postimg.cc/3wYkKd8s/Screenshot-2025-07-10-at-10-46-11-PM.png" alt="Zapp Creation Flow" width="300"/>
+  <img src="https://i.postimg.cc/VkjSQj89/Screenshot-2025-07-10-at-10-46-20-PM.png" alt="Zapp Page" width="300"/>
+  <img src="https://i.postimg.cc/NjhyzdWf/Screenshot-2025-07-10-at-10-46-26-PM.png" alt="Zapp Page" width="300"/>
+</p>
