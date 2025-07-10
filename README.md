@@ -1,36 +1,88 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# 🌊 ZWipe — Swipe to Discover & Launch Zora Coins
 
-## Getting Started
+**ZWipe** is a mobile-first, swipe-based discovery and creation app for Zora Coins on **Base**.  
+It brings the simplicity of Tinder to the chaotic world of memecoins — letting users swipe through trending tokens, mint what they like, and even create their own Zora coins with ease.
 
-First, run the development server:
+[🌀 Live Demo](https://zwipe.vercel.app)
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+---
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## ✨ Features
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+- 🔄 **Swipe-to-Discover Interface**  
+  Swipe left to skip, right to save or (soon) mint a Zora coin.
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+- 🧠 **Coincierge Engine**  
+  Personalized curation of Zora coins based on your wallet activity and minting history.
 
-## Learn More
+- 🤖 **AI Discovery Agent**  
+  Recommends coins based on wallet holdings, past swipes, and token interactions.
 
-To learn more about Next.js, take a look at the following resources:
+- 🪙 **Create Zora Coins**  
+  Launch your own Zora coin with a simple form — name, symbol, and supply — using the Zora API.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+- 📊 **Real-Time Coin Cards**  
+  Each card displays live price, 24h change, holder count, and metadata from the Zora Coins API.
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+- 🔗 **Base Support**  
+  Built natively on Base, with upcoming support for creating coins and buying via Base.
 
-## Deploy on Vercel
+- 🎨 **Minimal, Degen-Friendly UI**  
+  Mobile-optimized UX, a slick dollar-sign logo, and blue gradient brand theme.
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+---
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## Use of Zora Coins
+
+- **Fetching Coins Info**: Uses the Zora Coins SDK to retrieve coin information. [See usage in code](https://github.com/Ayushjain2205/zwipe/blob/main/app/api/getcoinsmostvaluable/route.ts)
+- **Creating Coins**: Uses the Zora Coins SDK to create new coins. [See usage in code](https://github.com/Ayushjain2205/zwipe/blob/main/components/memecoin/CreateCoinDialog.tsx#L105)
+
+---
+
+## 🔗 Zora Coins Integration
+
+ZWipe is deeply integrated with the **Zora Coins Protocol**:
+
+- Uses the **Zora Coins API** to:
+  - Fetch active and trending Zora ERC-20 tokens
+  - Pull live metadata for display on coin cards
+- Uses the **Zora SDK** to:
+  - Enable in-app creation of new Zora coins with custom metadata
+
+ZWipe is designed to be the discovery + creation layer on top of Zora — making it easy for anyone to find or launch a coin in seconds.
+
+---
+
+## 📦 Roadmap
+
+- ✅ MVP: Swipe, discover, and create coins
+- 🔜 Enable minting and buying with Base Sepolia
+- 📲 Launch as Telegram Mini App
+- 📊 Add trending dashboards + swipe stats
+- 🎯 Improve AI Coincierge with social + sentiment signals
+- 🧩 Add templates and meme generators for coin creation
+
+---
+
+## 🚀 Why Now
+
+- 🚀 Memecoin culture is peaking (again).
+- 🔓 Zora has unlocked fast coin creation — discovery is the next frontier.
+- 🌉 Base is growing as the home of meme economies.
+- 👉 And degens? They love to swipe.
+
+---
+
+## 🧪 Try it Live
+
+👉 https://zwipe.vercel.app  
+(💡 Buying is not supported on Base Sepolia, only on mainnet — creating coins is supported.)
+
+---
+
+## 🖼️ Gallery
+
+Add your app screenshots below:
+
+![Screenshot 1](#link-to-screenshot-1)
+![Screenshot 2](#link-to-screenshot-2)
