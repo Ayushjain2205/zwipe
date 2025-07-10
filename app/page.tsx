@@ -4,7 +4,15 @@ import type React from "react";
 import { useState, useEffect } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { X, Bot, Bookmark, BookmarkCheck, Check, Plus } from "lucide-react";
+import {
+  X,
+  Bot,
+  Bookmark,
+  BookmarkCheck,
+  Check,
+  Plus,
+  Filter,
+} from "lucide-react";
 import { getSuggestedTokens } from "@/components/memecoin/utils";
 import { mockMemecoins, Memecoin } from "@/components/memecoin/types";
 import MemecoinCard from "@/components/memecoin/MemecoinCard";
@@ -13,6 +21,7 @@ import BuyDialog from "@/components/memecoin/BuyDialog";
 import { ConnectButton } from "@rainbow-me/rainbowkit";
 import CreateCoinDialog from "@/components/memecoin/CreateCoinDialog";
 import Loader from "@/components/ui/Loader";
+import FilterDialog from "@/components/memecoin/FilterDialog";
 
 const colorPalette = [
   "from-pink-400 to-purple-500",
@@ -57,6 +66,7 @@ export default function MemecoinSwiper() {
   } | null>(null);
   const [showSplash, setShowSplash] = useState(true);
   const [showCreateDialog, setShowCreateDialog] = useState(false);
+  const [showFilterDialog, setShowFilterDialog] = useState(false);
 
   useEffect(() => {
     setMounted(true);
@@ -409,9 +419,23 @@ export default function MemecoinSwiper() {
 
       <div className="w-full max-w-sm mx-auto relative z-10">
         {/* Header */}
-        <div className="text-center mb-6 hidden md:block relative flex items-center justify-center">
+        <div className="mb-6 hidden md:flex flex-row items-center justify-between w-full relative">
+          {/* Filter Button */}
+          <button
+            onClick={() => setShowFilterDialog(true)}
+            className="rounded-full p-2 border-2 border-white transition-all duration-300 hover:scale-125 focus:outline-none group bg-gradient-to-br from-blue-400 to-cyan-500"
+            title="Filter Coins"
+            style={{ marginRight: 8 }}
+          >
+            <span className="relative block">
+              <Filter
+                className="w-7 h-7 z-10 relative text-white transition-transform duration-300 group-hover:rotate-180 group-hover:scale-125"
+                strokeWidth={3}
+              />
+            </span>
+          </button>
           <h1
-            className="text-4xl text-white mb-2 drop-shadow-2xl"
+            className="text-4xl text-white mb-2 drop-shadow-2xl text-center flex-1"
             style={{
               fontFamily: "Slackey, cursive",
               textShadow: "0 0 20px rgba(59, 130, 246, 0.5)",
@@ -428,9 +452,9 @@ export default function MemecoinSwiper() {
           {/* Create Button */}
           <button
             onClick={() => setShowCreateDialog(true)}
-            className="absolute right-0 top-1/2 -translate-y-1/2 rounded-full p-2 border-2 border-white transition-all duration-300 hover:scale-125 focus:outline-none group bg-gradient-to-br from-lime-400 to-green-500"
+            className="rounded-full p-2 border-2 border-white transition-all duration-300 hover:scale-125 focus:outline-none group bg-gradient-to-br from-lime-400 to-green-500"
             title="Create Coin"
-            style={{ marginLeft: 16 }}
+            style={{ marginLeft: 8 }}
           >
             <span className="relative block">
               {/* Plus Icon with funky animation */}
@@ -654,6 +678,12 @@ export default function MemecoinSwiper() {
         <CreateCoinDialog
           open={showCreateDialog}
           onOpenChange={setShowCreateDialog}
+        />
+
+        {/* Filter Dialog */}
+        <FilterDialog
+          open={showFilterDialog}
+          onOpenChange={setShowFilterDialog}
         />
       </div>
       <style jsx>{`
