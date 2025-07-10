@@ -12,7 +12,6 @@ import { useAccount, useWalletClient } from "wagmi";
 import {
   createCoin,
   type CreateCoinArgs,
-  getCoin,
   setApiKey,
   DeployCurrency,
   createMetadataBuilder,
@@ -25,6 +24,13 @@ import { Address } from "viem";
 interface CreateCoinDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
+}
+
+// Replace 'unknown' with a specific type for result
+interface CoinResult {
+  hash: string;
+  address?: string;
+  // Add more properties as needed, but avoid 'any'.
 }
 
 const CreateCoinDialog: React.FC<CreateCoinDialogProps> = ({
@@ -52,14 +58,14 @@ const CreateCoinDialog: React.FC<CreateCoinDialogProps> = ({
   });
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [loading, setLoading] = useState(false);
-  const [result, setResult] = useState<any>(null);
+  const [result, setResult] = useState<CoinResult | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   // Get Coin State
-  const [getAddress, setGetAddress] = useState("");
-  const [getLoading, setGetLoading] = useState(false);
-  const [getError, setGetError] = useState<string | null>(null);
-  const [coinData, setCoinData] = useState<any>(null);
+  // const [getAddress, setGetAddress] = useState("");
+  // const [getLoading, setGetLoading] = useState(false);
+  // const [getError, setGetError] = useState<string | null>(null);
+  // const [coinData, setCoinData] = useState<any>(null);
 
   const { address: account, isConnected } = useAccount();
   const { data: walletClientData, isLoading: walletLoading } =
@@ -68,9 +74,12 @@ const CreateCoinDialog: React.FC<CreateCoinDialogProps> = ({
   const inputRef = useRef<HTMLInputElement | null>(null);
 
   const handleChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+    e:
+      | React.ChangeEvent<HTMLInputElement>
+      | React.ChangeEvent<HTMLTextAreaElement>
   ) => {
-    setForm({ ...form, [e.target.name]: e.target.value });
+    const { name, value } = e.target as HTMLInputElement | HTMLTextAreaElement;
+    setForm({ ...form, [name]: value });
   };
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -122,35 +131,39 @@ const CreateCoinDialog: React.FC<CreateCoinDialogProps> = ({
       // 5. Create coin
       const res = await createCoin(coinParams, walletClient, publicClient);
       setResult(res);
-    } catch (err: any) {
-      setError(err.message || String(err));
+    } catch (err: unknown) {
+      if (err instanceof Error) {
+        setError(err.message);
+      } else {
+        setError(String(err));
+      }
     } finally {
       setLoading(false);
     }
   };
 
   // Get Coin Handler
-  const handleGetCoin = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setGetLoading(true);
-    setGetError(null);
-    setCoinData(null);
-    try {
-      if (!getAddress) throw new Error("Please enter a coin address.");
-      const trimmedAddress = getAddress.trim();
-      const response = await getCoin({
-        address: trimmedAddress,
-        chain: baseSepolia.id,
-      });
-      if (!response.data?.zora20Token)
-        throw new Error("Coin not found or invalid address.");
-      setCoinData(response.data.zora20Token);
-    } catch (err: any) {
-      setGetError(err.message || String(err));
-    } finally {
-      setGetLoading(false);
-    }
-  };
+  // const handleGetCoin = async (e: React.FormEvent) => {
+  //   e.preventDefault();
+  //   setGetLoading(true);
+  //   setGetError(null);
+  //   setCoinData(null);
+  //   try {
+  //     if (!getAddress) throw new Error("Please enter a coin address.");
+  //     const trimmedAddress = getAddress.trim();
+  //     const response = await getCoin({
+  //       address: trimmedAddress,
+  //       chain: baseSepolia.id,
+  //     });
+  //     if (!response.data?.zora20Token)
+  //       throw new Error("Coin not found or invalid address.");
+  //     setCoinData(response.data.zora20Token);
+  //   } catch (err: any) {
+  //     setGetError(err.message || String(err));
+  //   } finally {
+  //     setGetLoading(false);
+  //   }
+  // };
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -317,46 +330,49 @@ const CreateCoinDialog: React.FC<CreateCoinDialogProps> = ({
               </div>
             )}
             {/* Success state */}
-            {result && (
-              <div className="flex flex-col items-center justify-center w-full py-12">
-                <div
-                  className="text-3xl mb-4 text-green-600 font-bold"
-                  style={{ fontFamily: "Slackey, cursive" }}
-                >
-                  🎉 Coin Created!
-                </div>
-                <div
-                  className="mb-2 text-lg text-gray-700"
-                  style={{ fontFamily: "Slackey, cursive" }}
-                >
-                  Your coin has been successfully deployed.
-                </div>
-                <div className="mt-4 p-4 border-2 border-blue-300 rounded-xl bg-gradient-to-r from-blue-50 to-purple-50 w-full max-w-md text-sm shadow">
-                  <div>
-                    <b>Transaction:</b>{" "}
-                    <a
-                      href={`https://sepolia.basescan.org/tx/${result.hash}`}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="text-blue-600 underline break-all"
-                    >
-                      View on Explorer
-                    </a>
+            {result &&
+              typeof result === "object" &&
+              "hash" in result &&
+              "address" in result && (
+                <div className="flex flex-col items-center justify-center w-full py-12">
+                  <div
+                    className="text-3xl mb-4 text-green-600 font-bold"
+                    style={{ fontFamily: "Slackey, cursive" }}
+                  >
+                    🎉 Coin Created!
                   </div>
-                  <div>
-                    <b>Coin Address:</b>{" "}
-                    <a
-                      href={`https://sepolia.basescan.org/address/${result.address}`}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="text-blue-600 underline break-all"
-                    >
-                      View on Explorer
-                    </a>
+                  <div
+                    className="mb-2 text-lg text-gray-700"
+                    style={{ fontFamily: "Slackey, cursive" }}
+                  >
+                    Your coin has been successfully deployed.
+                  </div>
+                  <div className="mt-4 p-4 border-2 border-blue-300 rounded-xl bg-gradient-to-r from-blue-50 to-purple-50 w-full max-w-md text-sm shadow">
+                    <div>
+                      <b>Transaction:</b>{" "}
+                      <a
+                        href={`https://sepolia.basescan.org/tx/${result.hash}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-blue-600 underline break-all"
+                      >
+                        View on Explorer
+                      </a>
+                    </div>
+                    <div>
+                      <b>Coin Address:</b>{" "}
+                      <a
+                        href={`https://sepolia.basescan.org/address/${result.address}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-blue-600 underline break-all"
+                      >
+                        View on Explorer
+                      </a>
+                    </div>
                   </div>
                 </div>
-              </div>
-            )}
+              )}
             {/* Error state (only show if not loading/result) */}
             {!loading && !result && error && (
               <div
