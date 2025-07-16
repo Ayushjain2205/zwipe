@@ -128,10 +128,11 @@ export default function MemecoinSwiper() {
   }
 
   const currentCoin = memecoins[currentIndex];
+  const atEnd = currentIndex >= memecoins.length;
   const suggestedTokens = getSuggestedTokens(currentCoin?.id || "1", memecoins);
 
   const handleSwipe = (direction: "left" | "right") => {
-    if (isAnimating || isExpanded || showSuggestions) return;
+    if (isAnimating || isExpanded || showSuggestions || atEnd) return;
 
     setIsAnimating(true);
     setShowStamp(direction === "right" ? "buy" : "pass");
@@ -154,7 +155,7 @@ export default function MemecoinSwiper() {
   };
 
   const completeSwipe = () => {
-    setCurrentIndex((prev) => (prev + 1) % memecoins.length);
+    setCurrentIndex((prev) => prev + 1);
     setIsAnimating(false);
     setShowStamp(null);
     setExitAnimation(null);
@@ -253,6 +254,7 @@ export default function MemecoinSwiper() {
   };
 
   const toggleBookmark = () => {
+    if (!currentCoin) return;
     const newBookmarks = new Set(bookmarkedCoins);
     if (newBookmarks.has(currentCoin.id)) {
       newBookmarks.delete(currentCoin.id);
@@ -270,7 +272,7 @@ export default function MemecoinSwiper() {
     setBookmarkedCoins(newBookmarks);
   };
 
-  if (!currentCoin) return null;
+  if (!currentCoin && !atEnd) return null;
 
   const getCardStyle = () => {
     if (exitAnimation) {
@@ -487,9 +489,10 @@ export default function MemecoinSwiper() {
 
         {/* Card Stack */}
         <div className="relative mb-4" style={{ height: cardHeight }}>
-          {/* Background cards for stack effect - only show when not expanded or showing suggestions */}
+          {/* Background cards for stack effect - only show when not expanded or showing suggestions or at end */}
           {!isExpanded &&
             !showSuggestions &&
+            !atEnd &&
             memecoins
               .slice(currentIndex + 1, currentIndex + 3)
               .map((coin, index) => (
@@ -516,7 +519,7 @@ export default function MemecoinSwiper() {
               ))}
 
           {/* Suggestions View */}
-          {showSuggestions && (
+          {showSuggestions && !atEnd && (
             <SuggestionsView
               suggestedTokens={suggestedTokens}
               bookmarkedCoins={bookmarkedCoins}
@@ -525,8 +528,8 @@ export default function MemecoinSwiper() {
             />
           )}
 
-          {/* Main card - only show when not showing suggestions */}
-          {!showSuggestions && (
+          {/* Main card - only show when not showing suggestions or at end */}
+          {!showSuggestions && !atEnd && (
             <MemecoinCard
               coin={currentCoin}
               isExpanded={isExpanded}
@@ -542,8 +545,31 @@ export default function MemecoinSwiper() {
             />
           )}
 
-          {/* Swipe indicators - only show when not expanded and not showing suggestions */}
-          {isDragging && !isExpanded && !showSuggestions && (
+          {/* End of stack message */}
+          {atEnd && (
+            <Card className="flex flex-col items-center justify-center h-full border-4 border-white/30 bg-gradient-to-br from-gray-800 to-slate-900 shadow-2xl">
+              <CardContent className="flex flex-col items-center justify-center h-full p-8 text-center">
+                <div className="text-5xl mb-6">😅</div>
+                <h2
+                  className="text-2xl font-bold text-white mb-4"
+                  style={{ fontFamily: "Slackey, cursive" }}
+                >
+                  Oops! No more coins to show.
+                </h2>
+                <div className="mb-2">
+                  <span
+                    className="text-xl text-gray-300"
+                    style={{ fontFamily: "Slackey, cursive" }}
+                  >
+                    Try changing the filters
+                  </span>
+                </div>
+              </CardContent>
+            </Card>
+          )}
+
+          {/* Swipe indicators - only show when not expanded and not showing suggestions or at end */}
+          {isDragging && !isExpanded && !showSuggestions && !atEnd && (
             <>
               <div
                 className="absolute top-20 left-8 bg-red-500 text-white px-6 py-3 rounded-full text-lg transform -rotate-12 transition-opacity shadow-lg border-4 border-white"
@@ -567,7 +593,7 @@ export default function MemecoinSwiper() {
           )}
 
           {/* Stamp Effects */}
-          {showStamp && (
+          {showStamp && !atEnd && (
             <div
               className="absolute inset-0 flex items-center justify-center pointer-events-none z-30"
               style={{
@@ -610,6 +636,7 @@ export default function MemecoinSwiper() {
               onClick={toggleSuggestions}
               className="w-14 h-14 md:w-20 md:h-20 rounded-full border-6 border-white bg-gradient-to-br from-purple-500 to-purple-700 hover:from-purple-600 hover:to-purple-800 backdrop-blur-sm transition-all duration-200 shadow-2xl transform hover:scale-110 flex items-center justify-center relative overflow-hidden"
               title="CoinCierge AI Suggestions"
+              disabled={!currentCoin}
             >
               <div className="absolute inset-0 bg-gradient-to-r from-purple-400/20 to-pink-400/20 animate-pulse"></div>
               <Bot
@@ -623,7 +650,7 @@ export default function MemecoinSwiper() {
               size="lg"
               className="w-14 h-14 md:w-20 md:h-20 rounded-full border-6 border-white bg-gradient-to-br from-red-500 to-red-700 hover:from-red-600 hover:to-red-800 text-white shadow-2xl transform hover:scale-110 transition-all duration-200 flex items-center justify-center p-0 relative overflow-hidden"
               onClick={() => handleSwipe("left")}
-              disabled={isAnimating}
+              disabled={isAnimating || !currentCoin}
             >
               <div className="absolute inset-0 bg-gradient-to-r from-red-400/20 to-orange-400/20 animate-pulse"></div>
               <X
@@ -637,7 +664,7 @@ export default function MemecoinSwiper() {
               size="lg"
               className="w-14 h-14 md:w-20 md:h-20 rounded-full border-6 border-white bg-gradient-to-br from-lime-400 to-green-500 hover:from-lime-300 hover:to-green-400 text-black shadow-2xl transform hover:scale-110 transition-all duration-200 flex items-center justify-center p-0 relative overflow-hidden"
               onClick={() => handleSwipe("right")}
-              disabled={isAnimating}
+              disabled={isAnimating || !currentCoin}
             >
               <div className="absolute inset-0 bg-gradient-to-r from-yellow-300/30 to-lime-300/30 animate-pulse"></div>
               <Check
@@ -650,24 +677,25 @@ export default function MemecoinSwiper() {
             <button
               onClick={toggleBookmark}
               className={`w-14 h-14 md:w-20 md:h-20 rounded-full border-6 border-white backdrop-blur-sm transition-all duration-200 shadow-2xl transform hover:scale-110 flex items-center justify-center relative overflow-hidden ${
-                bookmarkedCoins.has(currentCoin.id)
+                currentCoin && bookmarkedCoins.has(currentCoin.id)
                   ? "bg-gradient-to-br from-yellow-400 to-orange-500 hover:from-yellow-300 hover:to-orange-400"
                   : "bg-gradient-to-br from-gray-600 to-gray-800 hover:from-gray-500 hover:to-gray-700"
               }`}
               title={
-                bookmarkedCoins.has(currentCoin.id)
+                currentCoin && bookmarkedCoins.has(currentCoin.id)
                   ? "Remove from bookmarks"
                   : "Save for later"
               }
+              disabled={!currentCoin}
             >
               <div
                 className={`absolute inset-0 animate-pulse ${
-                  bookmarkedCoins.has(currentCoin.id)
+                  currentCoin && bookmarkedCoins.has(currentCoin.id)
                     ? "bg-gradient-to-r from-yellow-300/20 to-orange-300/20"
                     : "bg-gradient-to-r from-gray-400/20 to-gray-600/20"
                 }`}
               ></div>
-              {bookmarkedCoins.has(currentCoin.id) ? (
+              {currentCoin && bookmarkedCoins.has(currentCoin.id) ? (
                 <BookmarkCheck
                   className="w-7 h-7 md:w-8 md:h-8 text-white relative z-10 drop-shadow-lg"
                   strokeWidth={3}
@@ -683,15 +711,17 @@ export default function MemecoinSwiper() {
         )}
 
         {/* Buy Amount Dialog */}
-        <BuyDialog
-          open={showBuyDialog}
-          onOpenChange={setShowBuyDialog}
-          coin={currentCoin}
-          buyAmount={buyAmount}
-          onBuyAmountChange={(e) => setBuyAmount(e.target.value)}
-          onBuyConfirm={handleBuyConfirm}
-          onBuyCancel={handleBuyCancel}
-        />
+        {currentCoin && (
+          <BuyDialog
+            open={showBuyDialog}
+            onOpenChange={setShowBuyDialog}
+            coin={currentCoin}
+            buyAmount={buyAmount}
+            onBuyAmountChange={(e) => setBuyAmount(e.target.value)}
+            onBuyConfirm={handleBuyConfirm}
+            onBuyCancel={handleBuyCancel}
+          />
+        )}
 
         {/* Create Coin Dialog */}
         <CreateCoinDialog
