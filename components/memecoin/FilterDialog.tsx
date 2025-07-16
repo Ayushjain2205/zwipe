@@ -32,8 +32,8 @@ const FilterDialog: React.FC<FilterDialogProps> = ({
   onApply,
 }) => {
   // Sliders state
-  const [marketCap, setMarketCap] = React.useState(100000);
-  const [uniqueHolders, setUniqueHolders] = React.useState(500);
+  const [marketCap, setMarketCap] = React.useState(10000);
+  const [uniqueHolders, setUniqueHolders] = React.useState(1);
   const tokenTypes = [
     { label: "Meme", value: "meme" },
     { label: "Utility", value: "utility" },
