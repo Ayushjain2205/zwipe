@@ -17,17 +17,74 @@ const SuggestionsView: React.FC<SuggestionsViewProps> = ({
   onSuggestionClick,
   onBack,
 }) => {
-  const [fallbackCoins, setFallbackCoins] = useState<Memecoin[]>([]);
+  const API_SOURCES = [
+    {
+      url: "/api/getcoinstop",
+      label: "Top Gainers",
+      color: "bg-lime-400 text-black",
+      count: 2,
+    },
+    {
+      url: "/api/getcoinsnew",
+      label: "New Coins",
+      color: "bg-blue-400 text-white",
+      count: 2,
+    },
+    {
+      url: "/api/getcoinslasttraded",
+      label: "Last Traded",
+      color: "bg-purple-400 text-white",
+      count: 2,
+    },
+    {
+      url: "/api/getcoinslasttradedunique",
+      label: "Unique Traders",
+      color: "bg-pink-400 text-white",
+      count: 2,
+    },
+    {
+      url: "/api/getcoinstopvolume24h",
+      label: "Top Volume 24h",
+      color: "bg-orange-400 text-black",
+      count: 2,
+    },
+  ];
+
+  const [fallbackCoins, setFallbackCoins] = useState<
+    (Memecoin & { sourceLabel: string; sourceColor: string })[]
+  >([]);
 
   useEffect(() => {
     if (suggestedTokens.length === 0) {
-      fetch("/api/getcoinstop")
-        .then((res) => res.json())
-        .then((data) => {
-          if (Array.isArray(data.coins)) {
-            setFallbackCoins(data.coins.slice(0, 6));
+      Promise.all(
+        API_SOURCES.map(async (src) => {
+          try {
+            const res = await fetch(`${src.url}?count=${src.count}`);
+            const data = await res.json();
+            if (Array.isArray(data.coins) && data.coins.length > 0) {
+              // For getcoinstop, return 2 coins, for others 1
+              return data.coins.slice(0, src.count).map((coin: any) => ({
+                ...coin,
+                sourceLabel: src.label,
+                sourceColor: src.color,
+              }));
+            }
+          } catch (e) {
+            // ignore error, skip this coin
           }
+          return [];
+        })
+      ).then((results) => {
+        // Flatten the array of arrays
+        const flat = results.flat().filter(Boolean) as any[];
+        const seen = new Set();
+        const deduped = flat.filter((coin) => {
+          if (seen.has(coin.id)) return false;
+          seen.add(coin.id);
+          return true;
         });
+        setFallbackCoins(deduped.slice(0, 8)); // Show only the first 8 unique coins
+      });
     }
   }, [suggestedTokens]);
 
@@ -80,9 +137,9 @@ const SuggestionsView: React.FC<SuggestionsViewProps> = ({
                   <span className="mt-2 animate-spin text-3xl">🪙</span>
                 </div>
               ) : (
-                coinsToShow.map((coin: Memecoin) => (
+                coinsToShow.map((coin: any) => (
                   <div
-                    key={coin.id}
+                    key={`${coin.id}-${coin.sourceLabel}`}
                     onClick={() => onSuggestionClick(coin.id)}
                     className="relative aspect-[3/4] rounded-2xl overflow-hidden cursor-pointer transition-all duration-200 hover:scale-105 shadow-lg"
                     style={{
@@ -133,21 +190,37 @@ const SuggestionsView: React.FC<SuggestionsViewProps> = ({
                     {/* Gradient Overlay */}
                     <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
 
-                    {/* Price Badge */}
-                    <div className="absolute top-3 right-3">
-                      <Badge
-                        variant={coin.change24h > 0 ? "default" : "destructive"}
-                        className={`text-xs px-2 py-1 ${
-                          coin.change24h > 0
-                            ? "bg-lime-400 text-black"
-                            : "bg-red-500 text-white"
-                        }`}
-                        style={{ fontFamily: "Slackey, cursive" }}
-                      >
-                        {coin.change24h > 0 ? "+" : ""}
-                        {coin.change24h}%
-                      </Badge>
-                    </div>
+                    {/* Source Badge (top right) */}
+                    {coin.sourceLabel && (
+                      <div className="absolute top-3 right-3 z-10">
+                        <Badge
+                          className={`text-xs px-2 py-1 ${coin.sourceColor}`}
+                          style={{ fontFamily: "Slackey, cursive" }}
+                        >
+                          {coin.sourceLabel}
+                        </Badge>
+                      </div>
+                    )}
+
+                    {/* Price Badge (below source badge, if not fallback) */}
+                    {coin.change24h !== undefined && (
+                      <div className="absolute top-12 right-3">
+                        <Badge
+                          variant={
+                            coin.change24h > 0 ? "default" : "destructive"
+                          }
+                          className={`text-xs px-2 py-1 ${
+                            coin.change24h > 0
+                              ? "bg-lime-400 text-black"
+                              : "bg-red-500 text-white"
+                          }`}
+                          style={{ fontFamily: "Slackey, cursive" }}
+                        >
+                          {coin.change24h > 0 ? "+" : ""}
+                          {coin.change24h}%
+                        </Badge>
+                      </div>
+                    )}
 
                     {/* Coin Info */}
                     <div className="absolute bottom-0 left-0 right-0 p-3 text-white">
