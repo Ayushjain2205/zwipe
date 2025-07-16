@@ -295,19 +295,19 @@ export default function MemecoinSwiper() {
         zIndex: 20,
       };
     }
-
     if (isDragging && !isExpanded && !showSuggestions) {
       return {
         transform: `translateX(${dragOffset.x}px) translateY(${
           dragOffset.y
         }px) rotate(${dragOffset.x * 0.1}deg)`,
         zIndex: 20,
+        transition: "none", // Prevent inbound animation while dragging
       };
     }
-
     return {
       transform: "none",
       zIndex: 20,
+      transition: "none", // Prevent inbound animation by default
     };
   };
 
@@ -515,16 +515,18 @@ export default function MemecoinSwiper() {
                   .map((coin, index) => (
                     <Card
                       key={coin.id}
-                      className="absolute inset-0 border-4 border-white/20 transition-all duration-500 ease-out shadow-2xl"
+                      className="absolute inset-0 border-4 border-white/20 shadow-2xl"
                       style={{
-                        transform: `scale(${0.95 - index * 0.05}) translateY(${
-                          index * 12
+                        transform: `scale(${0.85 - index * 0.05}) translateY(${
+                          index * 24
                         }px)`,
                         zIndex: 10 - index,
                         background: `linear-gradient(135deg, ${
                           coin.color.split(" ")[1]
                         } 0%, ${coin.color.split(" ")[3]} 100%)`,
                         opacity: 0.7 - index * 0.2,
+                        transition:
+                          "transform 1.8s cubic-bezier(0.22, 1, 0.36, 1)", // More dramatic, slower inbound animation
                       }}
                     >
                       <CardContent className="p-0 h-full">
