@@ -42,10 +42,6 @@ export async function GET(req: NextRequest) {
       : undefined;
 
     // Filter coins
-    // TEMP: Log the first coin to inspect structure
-    if (coins.length > 0) {
-      console.log("First coin:", coins[0]);
-    }
     coins = coins.filter((coin: Coin) => {
       let pass = true;
       if (marketCap !== undefined) {

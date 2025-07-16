@@ -22,6 +22,7 @@ import { ConnectButton } from "@rainbow-me/rainbowkit";
 import CreateCoinDialog from "@/components/memecoin/CreateCoinDialog";
 import Loader from "@/components/ui/Loader";
 import FilterDialog from "@/components/memecoin/FilterDialog";
+import CircleLoader from "@/components/ui/CircleLoader";
 
 const colorPalette = [
   "from-pink-400 to-purple-500",
@@ -73,10 +74,19 @@ export default function MemecoinSwiper() {
     selectedTypes?: string[];
     safeScan?: boolean;
   }>({});
+  const [showHydrationLoader, setShowHydrationLoader] = useState(true);
 
   useEffect(() => {
     setMounted(true);
   }, []);
+
+  // Ensure hydration loader is shown for at least 2 seconds
+  useEffect(() => {
+    if (mounted) {
+      const timer = setTimeout(() => setShowHydrationLoader(false), 2000);
+      return () => clearTimeout(timer);
+    }
+  }, [mounted]);
 
   // Fetch memecoins, optionally with filters
   const fetchMemecoins = async (activeFilters = filters) => {
@@ -122,8 +132,8 @@ export default function MemecoinSwiper() {
     }
   }, []);
 
-  // Show loader until both hydration and data loading are complete
-  if (!mounted || loading) {
+  // Show loader until hydration is complete and at least 2 seconds have passed
+  if (showHydrationLoader) {
     return <Loader />;
   }
 
@@ -489,120 +499,129 @@ export default function MemecoinSwiper() {
 
         {/* Card Stack */}
         <div className="relative mb-4" style={{ height: cardHeight }}>
-          {/* Background cards for stack effect - only show when not expanded or showing suggestions or at end */}
-          {!isExpanded &&
-            !showSuggestions &&
-            !atEnd &&
-            memecoins
-              .slice(currentIndex + 1, currentIndex + 3)
-              .map((coin, index) => (
-                <Card
-                  key={coin.id}
-                  className="absolute inset-0 border-4 border-white/20 transition-all duration-500 ease-out shadow-2xl"
-                  style={{
-                    transform: `scale(${0.95 - index * 0.05}) translateY(${
-                      index * 12
-                    }px)`,
-                    zIndex: 10 - index,
-                    background: `linear-gradient(135deg, ${
-                      coin.color.split(" ")[1]
-                    } 0%, ${coin.color.split(" ")[3]} 100%)`,
-                    opacity: 0.7 - index * 0.2,
-                  }}
-                >
-                  <CardContent className="p-0 h-full">
-                    <div className="h-full flex flex-col">
-                      <div className="flex-1 bg-black/10 rounded-t-lg"></div>
+          {/* Show round loader in place of card stack when loading memecoins */}
+          {loading ? (
+            <div className="absolute inset-0 flex items-center justify-center bg-black/30 rounded-xl z-30">
+              <CircleLoader size={64} />
+            </div>
+          ) : (
+            <>
+              {/* Background cards for stack effect - only show when not expanded or showing suggestions or at end */}
+              {!isExpanded &&
+                !showSuggestions &&
+                !atEnd &&
+                memecoins
+                  .slice(currentIndex + 1, currentIndex + 3)
+                  .map((coin, index) => (
+                    <Card
+                      key={coin.id}
+                      className="absolute inset-0 border-4 border-white/20 transition-all duration-500 ease-out shadow-2xl"
+                      style={{
+                        transform: `scale(${0.95 - index * 0.05}) translateY(${
+                          index * 12
+                        }px)`,
+                        zIndex: 10 - index,
+                        background: `linear-gradient(135deg, ${
+                          coin.color.split(" ")[1]
+                        } 0%, ${coin.color.split(" ")[3]} 100%)`,
+                        opacity: 0.7 - index * 0.2,
+                      }}
+                    >
+                      <CardContent className="p-0 h-full">
+                        <div className="h-full flex flex-col">
+                          <div className="flex-1 bg-black/10 rounded-t-lg"></div>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  ))}
+
+              {/* Suggestions View */}
+              {showSuggestions && !atEnd && (
+                <SuggestionsView
+                  suggestedTokens={suggestedTokens}
+                  bookmarkedCoins={bookmarkedCoins}
+                  onSuggestionClick={handleSuggestionClick}
+                  onBack={toggleSuggestions}
+                />
+              )}
+
+              {/* Main card - only show when not showing suggestions or at end */}
+              {!showSuggestions && !atEnd && (
+                <MemecoinCard
+                  coin={currentCoin}
+                  isExpanded={isExpanded}
+                  getCardStyle={getCardStyle}
+                  onMouseDown={handleMouseDown}
+                  onMouseMove={handleMouseMove}
+                  onMouseUp={handleMouseUp}
+                  onMouseLeave={handleMouseUp}
+                  onTouchStart={handleTouchStart}
+                  onTouchMove={handleTouchMove}
+                  onTouchEnd={handleTouchEnd}
+                  onToggleExpanded={toggleExpanded}
+                />
+              )}
+
+              {/* End of stack message */}
+              {atEnd && (
+                <Card className="flex flex-col items-center justify-center h-full border-4 border-white/30 bg-gradient-to-br from-gray-800 to-slate-900 shadow-2xl">
+                  <CardContent className="flex flex-col items-center justify-center h-full p-8 text-center">
+                    <div className="text-5xl mb-6">😅</div>
+                    <h2
+                      className="text-2xl font-bold text-white mb-4"
+                      style={{ fontFamily: "Slackey, cursive" }}
+                    >
+                      Oops! No more coins to show.
+                    </h2>
+                    <div className="mb-2">
+                      <span
+                        className="text-xl text-gray-300"
+                        style={{ fontFamily: "Slackey, cursive" }}
+                      >
+                        Try changing the filters
+                      </span>
                     </div>
                   </CardContent>
                 </Card>
-              ))}
+              )}
 
-          {/* Suggestions View */}
-          {showSuggestions && !atEnd && (
-            <SuggestionsView
-              suggestedTokens={suggestedTokens}
-              bookmarkedCoins={bookmarkedCoins}
-              onSuggestionClick={handleSuggestionClick}
-              onBack={toggleSuggestions}
-            />
-          )}
-
-          {/* Main card - only show when not showing suggestions or at end */}
-          {!showSuggestions && !atEnd && (
-            <MemecoinCard
-              coin={currentCoin}
-              isExpanded={isExpanded}
-              getCardStyle={getCardStyle}
-              onMouseDown={handleMouseDown}
-              onMouseMove={handleMouseMove}
-              onMouseUp={handleMouseUp}
-              onMouseLeave={handleMouseUp}
-              onTouchStart={handleTouchStart}
-              onTouchMove={handleTouchMove}
-              onTouchEnd={handleTouchEnd}
-              onToggleExpanded={toggleExpanded}
-            />
-          )}
-
-          {/* End of stack message */}
-          {atEnd && (
-            <Card className="flex flex-col items-center justify-center h-full border-4 border-white/30 bg-gradient-to-br from-gray-800 to-slate-900 shadow-2xl">
-              <CardContent className="flex flex-col items-center justify-center h-full p-8 text-center">
-                <div className="text-5xl mb-6">😅</div>
-                <h2
-                  className="text-2xl font-bold text-white mb-4"
-                  style={{ fontFamily: "Slackey, cursive" }}
-                >
-                  Oops! No more coins to show.
-                </h2>
-                <div className="mb-2">
-                  <span
-                    className="text-xl text-gray-300"
-                    style={{ fontFamily: "Slackey, cursive" }}
+              {/* Swipe indicators - only show when not expanded and not showing suggestions or at end */}
+              {isDragging && !isExpanded && !showSuggestions && !atEnd && (
+                <>
+                  <div
+                    className="absolute top-20 left-8 bg-red-500 text-white px-6 py-3 rounded-full text-lg transform -rotate-12 transition-opacity shadow-lg border-4 border-white"
+                    style={{
+                      opacity: dragOffset.x < -50 ? 1 : 0,
+                      fontFamily: "Slackey, cursive",
+                    }}
                   >
-                    Try changing the filters
-                  </span>
-                </div>
-              </CardContent>
-            </Card>
-          )}
+                    NOPE!
+                  </div>
+                  <div
+                    className="absolute top-20 right-8 bg-lime-400 text-black px-6 py-3 rounded-full text-lg transform rotate-12 transition-opacity shadow-lg border-4 border-white"
+                    style={{
+                      opacity: dragOffset.x > 50 ? 1 : 0,
+                      fontFamily: "Slackey, cursive",
+                    }}
+                  >
+                    BUY!
+                  </div>
+                </>
+              )}
 
-          {/* Swipe indicators - only show when not expanded and not showing suggestions or at end */}
-          {isDragging && !isExpanded && !showSuggestions && !atEnd && (
-            <>
-              <div
-                className="absolute top-20 left-8 bg-red-500 text-white px-6 py-3 rounded-full text-lg transform -rotate-12 transition-opacity shadow-lg border-4 border-white"
-                style={{
-                  opacity: dragOffset.x < -50 ? 1 : 0,
-                  fontFamily: "Slackey, cursive",
-                }}
-              >
-                NOPE!
-              </div>
-              <div
-                className="absolute top-20 right-8 bg-lime-400 text-black px-6 py-3 rounded-full text-lg transform rotate-12 transition-opacity shadow-lg border-4 border-white"
-                style={{
-                  opacity: dragOffset.x > 50 ? 1 : 0,
-                  fontFamily: "Slackey, cursive",
-                }}
-              >
-                BUY!
-              </div>
-            </>
-          )}
-
-          {/* Stamp Effects */}
-          {showStamp && !atEnd && (
-            <div
-              className="absolute inset-0 flex items-center justify-center pointer-events-none z-30"
-              style={{
-                opacity: exitAnimation ? 0 : 1,
-                transition: exitAnimation ? "opacity 0.6s ease-out" : "none",
-              }}
-            >
-              <div
-                className={`
+              {/* Stamp Effects */}
+              {showStamp && !atEnd && (
+                <div
+                  className="absolute inset-0 flex items-center justify-center pointer-events-none z-30"
+                  style={{
+                    opacity: exitAnimation ? 0 : 1,
+                    transition: exitAnimation
+                      ? "opacity 0.6s ease-out"
+                      : "none",
+                  }}
+                >
+                  <div
+                    className={`
         text-7xl px-12 py-6 border-8 rounded-2xl transform rotate-12 animate-pulse shadow-2xl
         ${
           showStamp === "buy"
@@ -612,19 +631,21 @@ export default function MemecoinSwiper() {
             : "text-yellow-500 border-yellow-500 bg-yellow-50"
         }
       `}
-                style={{
-                  fontFamily: "Slackey, cursive",
-                  textShadow: "4px 4px 0px rgba(0,0,0,0.3)",
-                  animation: "stamp 0.8s ease-out",
-                }}
-              >
-                {showStamp === "buy"
-                  ? "BOUGHT!"
-                  : showStamp === "pass"
-                  ? "PASSED!"
-                  : "SAVED!"}
-              </div>
-            </div>
+                    style={{
+                      fontFamily: "Slackey, cursive",
+                      textShadow: "4px 4px 0px rgba(0,0,0,0.3)",
+                      animation: "stamp 0.8s ease-out",
+                    }}
+                  >
+                    {showStamp === "buy"
+                      ? "BOUGHT!"
+                      : showStamp === "pass"
+                      ? "PASSED!"
+                      : "SAVED!"}
+                  </div>
+                </div>
+              )}
+            </>
           )}
         </div>
 
