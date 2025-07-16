@@ -16,31 +16,31 @@ export const Context = createContext<{
   setStreamPromise: () => {},
 });
 
-// Base Sepolia config
-const baseSepolia = {
-  id: 84532,
-  name: "Base Sepolia",
+// Base Mainnet config
+const baseMainnet = {
+  id: 8453,
+  name: "Base Mainnet",
   nativeCurrency: {
     name: "Ethereum",
     symbol: "ETH",
     decimals: 18,
   },
   rpcUrls: {
-    default: { http: ["https://sepolia.base.org"] },
-    public: { http: ["https://sepolia.base.org"] },
+    default: { http: ["https://mainnet.base.org"] },
+    public: { http: ["https://mainnet.base.org"] },
   },
   blockExplorers: {
-    default: { name: "Basescan", url: "https://sepolia.basescan.org" },
+    default: { name: "Basescan", url: "https://basescan.org" },
   },
-  testnet: true,
+  testnet: false,
 };
 
 const config = getDefaultConfig({
   appName: "ZappForge",
-  projectId: "zappforge-base-sepolia", // You can use any string here
-  chains: [baseSepolia],
+  projectId: "zappforge-base-mainnet", // You can use any string here
+  chains: [baseMainnet],
   transports: {
-    [baseSepolia.id]: http("https://sepolia.base.org"),
+    [baseMainnet.id]: http("https://mainnet.base.org"),
   },
 });
 

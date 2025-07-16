@@ -18,7 +18,7 @@ import {
   createZoraUploaderForCreator,
 } from "@zoralabs/coins-sdk";
 import { createPublicClient, http, createWalletClient, custom } from "viem";
-import { baseSepolia } from "viem/chains";
+import { base } from "viem/chains";
 import { Address } from "viem";
 
 interface CreateCoinDialogProps {
@@ -112,21 +112,21 @@ const CreateCoinDialog: React.FC<CreateCoinDialogProps> = ({
 
       // 2. Create a viem wallet client from the wagmi walletClient
       const walletClient = createWalletClient({
-        chain: baseSepolia,
+        chain: base,
         transport: custom(walletClientData.transport),
         account: account,
       });
-      // 3. Create public client for baseSepolia
+      // 3. Create public client for base
       const publicClient = createPublicClient({
-        chain: baseSepolia,
-        transport: http(baseSepolia.rpcUrls.default.http[0]),
+        chain: base,
+        transport: http(base.rpcUrls.default.http[0]),
       });
       // 4. Prepare coin params
       const coinParams: CreateCoinArgs = {
         ...createMetadataParameters,
         payoutRecipient: (form.payoutRecipient || account) as Address,
-        chainId: baseSepolia.id,
-        currency: DeployCurrency.ETH, // ETH is supported on Base Sepolia
+        chainId: base.id,
+        currency: DeployCurrency.ETH, // ETH is supported on Base Mainnet
       };
       // 5. Create coin
       const res = await createCoin(coinParams, walletClient, publicClient);
@@ -351,7 +351,7 @@ const CreateCoinDialog: React.FC<CreateCoinDialogProps> = ({
                     <div>
                       <b>Transaction:</b>{" "}
                       <a
-                        href={`https://sepolia.basescan.org/tx/${result.hash}`}
+                        href={`https://basescan.org/tx/${result.hash}`}
                         target="_blank"
                         rel="noopener noreferrer"
                         className="text-blue-600 underline break-all"
@@ -362,7 +362,7 @@ const CreateCoinDialog: React.FC<CreateCoinDialogProps> = ({
                     <div>
                       <b>Coin Address:</b>{" "}
                       <a
-                        href={`https://sepolia.basescan.org/address/${result.address}`}
+                        href={`https://basescan.org/address/${result.address}`}
                         target="_blank"
                         rel="noopener noreferrer"
                         className="text-blue-600 underline break-all"
