@@ -31,7 +31,31 @@ export async function GET(req: NextRequest) {
   try {
     const response = await getCoinsTopGainers({ count, after });
     const edges = response.data?.exploreList?.edges || [];
-    const coins = edges.map((edge: { node: Coin }) => edge.node);
+    let coins = edges.map((edge: { node: Coin }) => edge.node);
+
+    // Read filters from query params
+    const marketCap = searchParams.get("marketCap") ? parseFloat(searchParams.get("marketCap") as string) : undefined;
+    const uniqueHolders = searchParams.get("uniqueHolders") ? parseInt(searchParams.get("uniqueHolders") as string, 10) : undefined;
+    const types = searchParams.get("types") ? (searchParams.get("types") as string).split(",") : undefined;
+    const safeScan = searchParams.get("safeScan") ? searchParams.get("safeScan") === "true" : undefined;
+
+    // Filter coins
+    // TEMP: Log the first coin to inspect structure
+    if (coins.length > 0) {
+      // @ts-ignore
+      console.log('First coin:', coins[0]);
+    }
+    coins = coins.filter((coin: Coin) => {
+      let pass = true;
+      if (marketCap !== undefined) {
+        const coinMarketCap = typeof coin.marketCap === 'string' ? parseFloat(coin.marketCap) : coin.marketCap;
+        pass = pass && coinMarketCap >= marketCap;
+      }
+      if (uniqueHolders !== undefined) {
+        pass = pass && coin.uniqueHolders >= uniqueHolders;
+      }
+      return pass;
+    });
     const pagination = {
       cursor: response.data?.exploreList?.pageInfo?.endCursor || null,
     };

@@ -67,30 +67,49 @@ export default function MemecoinSwiper() {
   const [showSplash, setShowSplash] = useState(true);
   const [showCreateDialog, setShowCreateDialog] = useState(false);
   const [showFilterDialog, setShowFilterDialog] = useState(false);
+  const [filters, setFilters] = useState<{
+    marketCap?: number;
+    uniqueHolders?: number;
+    selectedTypes?: string[];
+    safeScan?: boolean;
+  }>({});
 
   useEffect(() => {
     setMounted(true);
   }, []);
 
+  // Fetch memecoins, optionally with filters
+  const fetchMemecoins = async (activeFilters = filters) => {
+    setLoading(true);
+    try {
+      const params = new URLSearchParams();
+      if (activeFilters.marketCap !== undefined)
+        params.append("marketCap", String(activeFilters.marketCap));
+      if (activeFilters.uniqueHolders !== undefined)
+        params.append("uniqueHolders", String(activeFilters.uniqueHolders));
+      if (activeFilters.selectedTypes && activeFilters.selectedTypes.length > 0)
+        params.append("types", activeFilters.selectedTypes.join(","));
+      if (activeFilters.safeScan !== undefined)
+        params.append("safeScan", String(activeFilters.safeScan));
+      const query = params.toString();
+      const res = await fetch(`/api/getcoinstop${query ? "?" + query : ""}`);
+      if (!res.ok) throw new Error("Failed to fetch memecoins");
+      const data = await res.json();
+      setMemecoins(
+        Array.isArray(data.coins) ? data.coins.map(assignColorToCoin) : []
+      );
+      setCurrentIndex(0);
+    } catch (err) {
+      console.error(err);
+      setMemecoins(mockMemecoins); // fallback to mock if error
+    } finally {
+      setLoading(false);
+    }
+  };
+
   useEffect(() => {
-    // Fetch real memecoins data from API
-    const fetchMemecoins = async () => {
-      setLoading(true);
-      try {
-        const res = await fetch("/api/getcoinstop");
-        if (!res.ok) throw new Error("Failed to fetch memecoins");
-        const data = await res.json();
-        setMemecoins(
-          Array.isArray(data.coins) ? data.coins.map(assignColorToCoin) : []
-        );
-      } catch (err) {
-        console.error(err);
-        setMemecoins(mockMemecoins); // fallback to mock if error
-      } finally {
-        setLoading(false);
-      }
-    };
     fetchMemecoins();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() => {
@@ -684,6 +703,10 @@ export default function MemecoinSwiper() {
         <FilterDialog
           open={showFilterDialog}
           onOpenChange={setShowFilterDialog}
+          onApply={(newFilters) => {
+            setFilters(newFilters);
+            fetchMemecoins(newFilters);
+          }}
         />
       </div>
       <style jsx>{`

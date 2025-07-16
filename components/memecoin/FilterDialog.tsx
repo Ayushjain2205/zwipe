@@ -13,6 +13,12 @@ import { Label } from "@/components/ui/label";
 interface FilterDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  onApply: (filters: {
+    marketCap: number;
+    uniqueHolders: number;
+    selectedTypes: string[];
+    safeScan: boolean;
+  }) => void;
 }
 
 const minMarketCap = 0;
@@ -20,7 +26,7 @@ const maxMarketCap = 10000000;
 const minHolders = 0;
 const maxHolders = 1000;
 
-const FilterDialog: React.FC<FilterDialogProps> = ({ open, onOpenChange }) => {
+const FilterDialog: React.FC<FilterDialogProps> = ({ open, onOpenChange, onApply }) => {
   // Sliders state
   const [marketCap, setMarketCap] = React.useState(1000000);
   const [uniqueHolders, setUniqueHolders] = React.useState(500);
@@ -40,7 +46,12 @@ const FilterDialog: React.FC<FilterDialogProps> = ({ open, onOpenChange }) => {
   };
 
   const handleApply = () => {
-    // Placeholder: just close dialog for now
+    onApply({
+      marketCap,
+      uniqueHolders,
+      selectedTypes,
+      safeScan,
+    });
     onOpenChange(false);
   };
 
