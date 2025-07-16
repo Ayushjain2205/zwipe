@@ -22,13 +22,17 @@ interface FilterDialogProps {
 }
 
 const minMarketCap = 0;
-const maxMarketCap = 10000000;
+const maxMarketCap = 1000000;
 const minHolders = 0;
 const maxHolders = 1000;
 
-const FilterDialog: React.FC<FilterDialogProps> = ({ open, onOpenChange, onApply }) => {
+const FilterDialog: React.FC<FilterDialogProps> = ({
+  open,
+  onOpenChange,
+  onApply,
+}) => {
   // Sliders state
-  const [marketCap, setMarketCap] = React.useState(1000000);
+  const [marketCap, setMarketCap] = React.useState(100000);
   const [uniqueHolders, setUniqueHolders] = React.useState(500);
   const tokenTypes = [
     { label: "Meme", value: "meme" },
