@@ -254,12 +254,18 @@ export default function MemecoinSwiper() {
     setIsExpanded(false); // Close expanded view when showing suggestions
   };
 
-  const handleSuggestionClick = (coinId: string) => {
-    const coinIndex = memecoins.findIndex((coin) => coin.id === coinId);
+  const handleSuggestionClick = (coin: Memecoin) => {
+    const coinIndex = memecoins.findIndex((c) => c.id === coin.id);
     if (coinIndex !== -1) {
       setCurrentIndex(coinIndex);
       setShowSuggestions(false);
-      setIsExpanded(true); // Open expanded view for the selected coin
+      setIsExpanded(true);
+    } else {
+      // Add the coin to the start of the array and open it
+      setMemecoins((prev) => [assignColorToCoin(coin, 0), ...prev]);
+      setCurrentIndex(0);
+      setShowSuggestions(false);
+      setIsExpanded(true);
     }
   };
 

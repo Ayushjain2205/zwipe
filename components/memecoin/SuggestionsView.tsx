@@ -7,7 +7,7 @@ import { Memecoin } from "./types";
 interface SuggestionsViewProps {
   suggestedTokens: Memecoin[];
   bookmarkedCoins: Set<string>;
-  onSuggestionClick: (coinId: string) => void;
+  onSuggestionClick: (coin: Memecoin) => void;
   onBack: () => void;
 }
 
@@ -140,7 +140,7 @@ const SuggestionsView: React.FC<SuggestionsViewProps> = ({
                 coinsToShow.map((coin: any) => (
                   <div
                     key={`${coin.id}-${coin.sourceLabel}`}
-                    onClick={() => onSuggestionClick(coin.id)}
+                    onClick={() => onSuggestionClick(coin)}
                     className="relative aspect-[3/4] rounded-2xl overflow-hidden cursor-pointer transition-all duration-200 hover:scale-105 shadow-lg"
                     style={{
                       background: (() => {
