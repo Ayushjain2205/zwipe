@@ -34,21 +34,25 @@ export async function GET(req: NextRequest) {
     let coins = edges.map((edge: { node: Coin }) => edge.node);
 
     // Read filters from query params
-    const marketCap = searchParams.get("marketCap") ? parseFloat(searchParams.get("marketCap") as string) : undefined;
-    const uniqueHolders = searchParams.get("uniqueHolders") ? parseInt(searchParams.get("uniqueHolders") as string, 10) : undefined;
-    const types = searchParams.get("types") ? (searchParams.get("types") as string).split(",") : undefined;
-    const safeScan = searchParams.get("safeScan") ? searchParams.get("safeScan") === "true" : undefined;
+    const marketCap = searchParams.get("marketCap")
+      ? parseFloat(searchParams.get("marketCap") as string)
+      : undefined;
+    const uniqueHolders = searchParams.get("uniqueHolders")
+      ? parseInt(searchParams.get("uniqueHolders") as string, 10)
+      : undefined;
 
     // Filter coins
     // TEMP: Log the first coin to inspect structure
     if (coins.length > 0) {
-      // @ts-ignore
-      console.log('First coin:', coins[0]);
+      console.log("First coin:", coins[0]);
     }
     coins = coins.filter((coin: Coin) => {
       let pass = true;
       if (marketCap !== undefined) {
-        const coinMarketCap = typeof coin.marketCap === 'string' ? parseFloat(coin.marketCap) : coin.marketCap;
+        const coinMarketCap =
+          typeof coin.marketCap === "string"
+            ? parseFloat(coin.marketCap)
+            : coin.marketCap;
         pass = pass && coinMarketCap >= marketCap;
       }
       if (uniqueHolders !== undefined) {
