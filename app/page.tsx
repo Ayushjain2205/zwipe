@@ -23,10 +23,6 @@ import CreateCoinDialog from "@/components/memecoin/CreateCoinDialog";
 import Loader from "@/components/ui/Loader";
 import FilterDialog from "@/components/memecoin/FilterDialog";
 import CircleLoader from "@/components/ui/CircleLoader";
-import { tradeCoin } from "@zoralabs/coins-sdk";
-import { parseEther, createWalletClient, custom, type Address } from "viem";
-import { useAccount, useWalletClient, usePublicClient } from "wagmi";
-import { base } from "viem/chains";
 
 const colorPalette = [
   "from-pink-400 to-purple-500",
@@ -78,9 +74,6 @@ export default function MemecoinSwiper() {
     safeScan?: boolean;
   }>({});
   const [showHydrationLoader, setShowHydrationLoader] = useState(true);
-  const { address } = useAccount();
-  const { data: walletClient } = useWalletClient();
-  const publicClient = usePublicClient();
 
   useEffect(() => {
     setMounted(true);
@@ -178,50 +171,6 @@ export default function MemecoinSwiper() {
     setDragOffset({ x: 0, y: 0 });
     setIsExpanded(false);
     setShowSuggestions(false);
-  };
-
-  const handleBuyConfirm = async () => {
-    if (!address || !walletClient || !publicClient) {
-      alert("Wallet not connected");
-      return;
-    }
-    try {
-      setIsAnimating(true);
-      // Create a viem wallet client from wagmi walletClient
-      const viemWalletClient = createWalletClient({
-        chain: base,
-        transport: custom(walletClient.transport),
-        account: address,
-      });
-      const tradeParameters = {
-        sell: { type: "eth" as const },
-        buy: {
-          type: "erc20" as const,
-          address: currentCoin.address as Address,
-        },
-        amountIn: parseEther("0.001"), // Default amount for now
-        slippage: 0.05,
-        sender: address,
-      };
-      await tradeCoin({
-        tradeParameters,
-        walletClient: viemWalletClient,
-        account: viemWalletClient.account,
-        publicClient,
-      });
-      setShowBuyDialog(false);
-      completeSwipe();
-    } catch (err: any) {
-      alert("Buy failed: " + (err?.message || String(err)));
-      setIsAnimating(false);
-    }
-  };
-
-  const handleBuyCancel = () => {
-    setShowBuyDialog(false);
-    setIsAnimating(false);
-    setShowStamp(null);
-    setDragOffset({ x: 0, y: 0 });
   };
 
   const handleMouseDown = (e: React.MouseEvent) => {

@@ -72,11 +72,21 @@ const BuyDialog: React.FC<BuyDialogProps> = ({
       setBuyAmount("");
       setError(null);
       onBuySuccess();
-    } catch (err: any) {
-      if (err?.message?.toLowerCase().includes("user rejected")) {
+    } catch (err: unknown) {
+      let message = "Transaction failed";
+      type ErrorWithMessage = { message: string };
+      if (
+        typeof err === "object" &&
+        err &&
+        "message" in err &&
+        typeof (err as ErrorWithMessage).message === "string"
+      ) {
+        message = (err as ErrorWithMessage).message;
+      }
+      if (message.toLowerCase().includes("user rejected")) {
         setError("Transaction rejected by user.");
       } else {
-        setError(err?.message || "Transaction failed");
+        setError(message);
       }
       setLoading(false);
     }
