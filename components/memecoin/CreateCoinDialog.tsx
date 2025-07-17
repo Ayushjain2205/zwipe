@@ -320,7 +320,7 @@ const CreateCoinDialog: React.FC<CreateCoinDialogProps> = ({
             {/* Loader state */}
             {loading && !result && (
               <div className="flex flex-col items-center justify-center w-full py-12">
-                <div className="animate-spin rounded-full h-16 w-16 border-t-4 border-purple-400 border-b-4 border-blue-400 mb-6"></div>
+                <div className="animate-spin rounded-full h-16 w-16 border-t-4 border-b-4 border-blue-400 mb-6"></div>
                 <div
                   className="text-2xl font-bold text-purple-600"
                   style={{ fontFamily: "Slackey, cursive" }}
