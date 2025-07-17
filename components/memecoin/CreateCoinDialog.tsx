@@ -60,6 +60,7 @@ const CreateCoinDialog: React.FC<CreateCoinDialogProps> = ({
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState<CoinResult | null>(null);
   const [error, setError] = useState<string | null>(null);
+  // Remove fieldErrors for compactness
 
   // Get Coin State
   // const [getAddress, setGetAddress] = useState("");
@@ -73,6 +74,22 @@ const CreateCoinDialog: React.FC<CreateCoinDialogProps> = ({
 
   const inputRef = useRef<HTMLInputElement | null>(null);
 
+  // Reset all state when dialog closes
+  useEffect(() => {
+    if (!open) {
+      setForm({
+        name: "",
+        symbol: "",
+        description: "",
+        payoutRecipient: "",
+      });
+      setImageFile(null);
+      setResult(null);
+      setError(null);
+      // setFieldErrors({}); // Removed as per edit hint
+    }
+  }, [open]);
+
   const handleChange = (
     e:
       | React.ChangeEvent<HTMLInputElement>
@@ -80,13 +97,16 @@ const CreateCoinDialog: React.FC<CreateCoinDialogProps> = ({
   ) => {
     const { name, value } = e.target as HTMLInputElement | HTMLTextAreaElement;
     setForm({ ...form, [name]: value });
+    // setFieldErrors((prev) => ({ ...prev, [name]: "" })); // Clear field error on change
   };
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
       setImageFile(e.target.files[0]);
+      // setFieldErrors((prev) => ({ ...prev, image: "" })); // Clear field error on image change
     } else {
       setImageFile(null);
+      // setFieldErrors((prev) => ({ ...prev, image: "Image is required." })); // Set field error if image is cleared
     }
   };
 
@@ -95,20 +115,27 @@ const CreateCoinDialog: React.FC<CreateCoinDialogProps> = ({
     setLoading(true);
     setError(null);
     setResult(null);
+    // setFieldErrors({}); // Removed as per edit hint
     try {
       if (!account) throw new Error("Please connect your wallet.");
       if (!walletClientData) throw new Error("Wallet client not found.");
-      if (!form.name || !form.symbol || !form.description)
-        throw new Error("Please fill all fields.");
-      if (!imageFile) throw new Error("Please select an image.");
+      if (!form.name || !form.symbol || !form.description || !imageFile) {
+        setError("Please complete all required fields.");
+        setLoading(false);
+        return;
+      }
 
       // 1. Build and upload metadata to Zora IPFS using the SDK
-      const { createMetadataParameters } = await createMetadataBuilder()
+      let builder = createMetadataBuilder()
         .withName(form.name)
         .withSymbol(form.symbol)
-        .withDescription(form.description)
-        .withImage(imageFile)
-        .upload(createZoraUploaderForCreator(account));
+        .withDescription(form.description);
+      if (imageFile) {
+        builder = builder.withImage(imageFile);
+      }
+      const { createMetadataParameters } = await builder.upload(
+        createZoraUploaderForCreator(account)
+      );
 
       // 2. Create a viem wallet client from the wagmi walletClient
       const walletClient = createWalletClient({
@@ -132,11 +159,12 @@ const CreateCoinDialog: React.FC<CreateCoinDialogProps> = ({
       const res = await createCoin(coinParams, walletClient, publicClient);
       setResult(res);
     } catch (err: unknown) {
-      if (err instanceof Error) {
-        setError(err.message);
-      } else {
-        setError(String(err));
+      let friendlyMsg = "Something went wrong. Please try again.";
+      const msg = err instanceof Error ? err.message : String(err);
+      if (/user (rejected|denied)/i.test(msg)) {
+        friendlyMsg = "Transaction was cancelled.";
       }
+      setError(friendlyMsg);
     } finally {
       setLoading(false);
     }
@@ -189,7 +217,7 @@ const CreateCoinDialog: React.FC<CreateCoinDialogProps> = ({
               >
                 Create a new Zora coin on{" "}
                 <span className="text-blue-500 font-bold">Base</span>. Fill
-                these details and deploy your coin!
+                these details and deploy your coin!{" "}
               </DialogDescription>
             )}
           </DialogHeader>
@@ -203,7 +231,7 @@ const CreateCoinDialog: React.FC<CreateCoinDialogProps> = ({
               >
                 <input
                   name="name"
-                  placeholder="Coin Name"
+                  placeholder="Coin Name *"
                   value={form.name}
                   onChange={handleChange}
                   className="border-2 border-purple-300 p-3 rounded-xl bg-gradient-to-r from-purple-50 to-blue-50 focus:outline-none focus:ring-2 focus:ring-blue-400 text-lg shadow-sm"
@@ -213,7 +241,7 @@ const CreateCoinDialog: React.FC<CreateCoinDialogProps> = ({
                 />
                 <input
                   name="symbol"
-                  placeholder="Symbol (e.g. EGL)"
+                  placeholder="Symbol (e.g. EGL) *"
                   value={form.symbol}
                   onChange={handleChange}
                   className="border-2 border-purple-300 p-3 rounded-xl bg-gradient-to-r from-purple-50 to-blue-50 focus:outline-none focus:ring-2 focus:ring-blue-400 text-lg shadow-sm"
@@ -223,7 +251,7 @@ const CreateCoinDialog: React.FC<CreateCoinDialogProps> = ({
                 />
                 <textarea
                   name="description"
-                  placeholder="Description"
+                  placeholder="Description *"
                   value={form.description}
                   onChange={handleChange}
                   className="border-2 border-purple-300 p-3 rounded-xl bg-gradient-to-r from-purple-50 to-blue-50 focus:outline-none focus:ring-2 focus:ring-blue-400 text-lg shadow-sm"
@@ -231,12 +259,6 @@ const CreateCoinDialog: React.FC<CreateCoinDialogProps> = ({
                   disabled={!isConnected || walletLoading || !walletClientData}
                   style={{ fontFamily: "Slackey, cursive" }}
                 />
-                <label
-                  className="text-lg font-semibold mb-1"
-                  style={{ fontFamily: "Slackey, cursive" }}
-                >
-                  Coin Image
-                </label>
                 <div
                   className="flex flex-col items-center justify-center border-2 border-dashed border-purple-300 rounded-xl bg-gradient-to-r from-purple-50 to-blue-50 p-6 cursor-pointer transition hover:border-blue-400 relative"
                   style={{ minHeight: "120px" }}
@@ -269,7 +291,7 @@ const CreateCoinDialog: React.FC<CreateCoinDialogProps> = ({
                       className="text-gray-500 text-base"
                       style={{ fontFamily: "Slackey, cursive" }}
                     >
-                      Drag & drop or click to select an image (PNG/JPG)
+                      Drag & drop or click to select an image (PNG/JPG) *
                     </span>
                   )}
                   <input
@@ -301,7 +323,11 @@ const CreateCoinDialog: React.FC<CreateCoinDialogProps> = ({
                     loading ||
                     !isConnected ||
                     walletLoading ||
-                    !walletClientData
+                    !walletClientData ||
+                    !form.name ||
+                    !form.symbol ||
+                    !form.description ||
+                    !imageFile
                   }
                   style={{ fontFamily: "Slackey, cursive" }}
                 >
@@ -315,6 +341,15 @@ const CreateCoinDialog: React.FC<CreateCoinDialogProps> = ({
                     ? "Wallet Not Ready"
                     : "Create Coin"}
                 </Button>
+                {/* Show error only below the button */}
+                {error && (
+                  <div
+                    className="text-red-500 text-center text-sm mt-2"
+                    style={{ fontFamily: "Slackey, cursive", fontWeight: 500 }}
+                  >
+                    {error}
+                  </div>
+                )}
               </form>
             )}
             {/* Loader state */}
@@ -325,7 +360,7 @@ const CreateCoinDialog: React.FC<CreateCoinDialogProps> = ({
                   className="text-2xl font-bold text-purple-600"
                   style={{ fontFamily: "Slackey, cursive" }}
                 >
-                  Creating...
+                  Creating your coin
                 </div>
               </div>
             )}
@@ -373,15 +408,6 @@ const CreateCoinDialog: React.FC<CreateCoinDialogProps> = ({
                   </div>
                 </div>
               )}
-            {/* Error state (only show if not loading/result) */}
-            {!loading && !result && error && (
-              <div
-                className="text-red-600 mt-4 text-center"
-                style={{ fontFamily: "Slackey, cursive" }}
-              >
-                {error}
-              </div>
-            )}
             {/* Wallet connection states (only show if not loading/result) */}
             {!loading && !result && !isConnected && (
               <div
