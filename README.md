@@ -5,6 +5,8 @@ It brings the simplicity of Tinder to the chaotic world of memecoins — letting
 
 [🌀 Live Demo](https://zwipe.vercel.app)
 
+Creating coins is live on mainnet!
+
 ---
 
 ## ✨ Features
@@ -56,7 +58,6 @@ ZWipe is designed to be the discovery + creation layer on top of Zora — making
 ## 📦 Roadmap
 
 - ✅ MVP: Swipe, discover, and create coins
-- 🔜 Enable minting and buying with Base Sepolia
 - 📲 Launch as Telegram Mini App
 - 📊 Add trending dashboards + swipe stats
 - 🎯 Improve AI Coincierge with social + sentiment signals
